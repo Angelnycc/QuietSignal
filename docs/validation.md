@@ -11,6 +11,7 @@ Validated in the Codex cloud workspace on 2026-10-16.
 | `bun run demo` | Correlated scenario warns; duplicate, benign, expired, and revoked scenarios do not |
 | Synthetic HTTP service | Five member-demo scenarios, approved evidence release, aggregate redaction, and source fixture checked with local requests |
 | Chromium dashboard | All five scenario interactions passed, no page JavaScript errors, and no horizontal overflow at 390px mobile width |
+| Standalone HTML export | Exported document contents passed all five interactions in Chromium with zero network requests and no contributor identifiers. Managed Chromium blocks file-URL navigation, so a literal downloaded-file launch was not verified here. |
 | Native CRE simulation | Attempted; blocked before execution because the cloud CLI has no login/API key |
 | Deployed enclave / ZK / ACE / CCIP | Not implemented or validated |
 
@@ -19,3 +20,5 @@ The handler tests use a mock TeeRuntime. They verify the intended data flow, not
 CRE CLI v1.38.0 was installed after checking the published archive checksum and verifying the binary's GPG signature against the release installer key. The official Javy setup verified its published SHA-256 checksum. The Javy cache required a sandbox-approved write to `/home/agent/.cache/javy`.
 
 The existing sports-settlement-oracle checkout remains unchanged.
+
+API-key creation and deployment requests are deferred at the user's direction. They are not required to develop or review this prototype. Headless cloud CLI authentication is a later integration step; local browser-based CRE login supports simulation without requesting deployment access.

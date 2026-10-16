@@ -10,6 +10,7 @@
     "typecheck": "bun run --cwd correlation typecheck",
     "build": "bun run --cwd correlation build",
     "demo": "bun run scripts/demo.ts",
+    "export:demo": "bun run scripts/export-demo.ts",
     "dev": "bun run scripts/server.ts",
     "simulate": "cre workflow simulate correlation --target local-simulation --non-interactive --trigger-index 0"
   },

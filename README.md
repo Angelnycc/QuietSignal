@@ -30,6 +30,10 @@ bun run dev
 
 The last command starts a loopback-only dashboard and fixture service on port 8787. The five scenarios demonstrate a corroborated pattern, repeated reports from one member, harmless destination overlap, expired evidence, and revoked membership. Nothing is blocked or broadcast.
 
+For a standalone review demo, run `bun run export:demo` and open `dist/quietsignal-demo.html` in a browser. All five scenarios work offline with fixed fictional outputs produced by the same correlation and disclosure functions. No credentials, installation on the reviewer's computer, or deployment is needed. The demo contains no raw roster or event records.
+
+CRE authentication and deployment access are not prerequisites for this local prototype. We are deferring deployment requests while the first version is being designed and reviewed.
+
 ## Native CRE simulation
 
 Requires the CRE CLI (prepared cloud version: v1.38.0), a Chainlink account authenticated in the execution environment, and the SDK WASM tools:
@@ -58,10 +62,10 @@ This is a TEE design, not a claim of zero-knowledge security. Local simulation d
 
 ## Next milestones
 
-1. Authenticate this execution environment and validate the native CRE simulation.
+1. Review and refine the local evidence-sharing demo without requiring an API key or deployment request.
 2. Replace the mock roster with independently managed membership and connect one authenticated evidence source.
 3. Connect the tested brief generator to authenticated, encrypted member delivery and prevent membership-probing queries. Move the release decision inside the confidential workflow without exporting plaintext briefs through ordinary DON logs or public reports.
-4. Validate deployed confidential execution with beta access and a documented threat model.
+4. When ready, validate native CRE simulation using supported authentication, then separately validate deployed confidential execution with beta access and a documented threat model.
 5. Add ACE-backed access policies and, where needed, CCIP delivery with version/expiry/replay checks.
 6. Investigate a supported DECO integration for a specific source-authenticity statement; do not assume it supplies private correlation or anonymous membership automatically.
 
