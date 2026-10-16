@@ -1,6 +1,8 @@
 # QuietSignal project brief
 
-QuietSignal is an experimental confidential early-warning service for organizations using the same software suppliers. It correlates unusual post-update activity across independent participants while limiting disclosure of their underlying evidence.
+QuietSignal helps trusted organizations quietly exchange useful threat evidence without exposing unrelated sensitive information. Its initial focus is unusual post-update activity across organizations using the same software suppliers. Confidential processing supports an explicit evidence-sharing policy; the goal is to give recipients enough information to investigate while withholding full source logs and unnecessary identifying details.
+
+Planned member briefs include relevant destinations, affected software versions, sanitized event sequences, coarse time windows, corroboration, and evidence limitations. The current prototype releases aggregate status only; member briefs and access-controlled delivery remain to be built. See docs/evidence-sharing.md.
 
 The initial rule requires the same supplier, software version, and destination at three enrolled organizations, including two qualifying update → connection → unusual child-process sequences within 30 minutes. A result is an investigation lead, not a malware verdict.
 
