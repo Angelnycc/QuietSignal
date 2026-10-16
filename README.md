@@ -1,111 +1,147 @@
 # QuietSignal
 
-Share useful threat evidence with trusted participants while withholding unrelated sensitive information. QuietSignal is an early prototype for correlating suspicious software-supplier activity across organizations. Individually ambiguous events can become a useful investigation lead when independent organizations observe the same supplier, version, destination, and event sequence.
+**Share enough threat evidence to investigate a shared supplier incident—without forwarding everyone's logs.**
 
-The product goal is selective evidence sharing: recipients should receive enough evidence to investigate a threat without receiving contributors' full logs, employee information, internal network details, or unrelated activity. A synthetic member-brief generator and an authenticated local pilot now demonstrate this disclosure policy. Remote encrypted delivery and real-source integration remain future steps. See [the evidence-sharing policy](docs/evidence-sharing.md).
+[![Validate QuietSignal](https://github.com/Angelnycc/QuietSignal/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Angelnycc/QuietSignal/actions/workflows/ci.yml)
 
-## Current implementation
+[Explore the interactive website](https://angelnycc.github.io/QuietSignal/) · [Architecture](docs/architecture.md) · [Security model](docs/security-model.md) · [Validation evidence](docs/validation.md)
 
-- Strictly validated, deterministic correlation rules.
-- Three distinct enrolled organizations, including two reporting an update → connection → unusual child-process sequence, within a rolling 30-minute window.
-- Duplicate suppression, collector authorization, membership expiry/revocation, source freshness, and bounded alert validity.
-- A security-themed project website and a separate authenticated incident workspace.
-- Persistent SQLite runs/incidents, per-principal acknowledgement, approved evidence downloads, enrollment/collector controls, participant access files and a scoped audit trail.
-- Ed25519 signed synthetic collector admission, persistent nonce replay checks, strict event scope, bounded requests and controlled simulations that exercise the same ingestion endpoint.
-- Policy-approved evidence briefs with a relevant destination, approved software/version, sanitized sequence, coarse search window, threshold corroboration, expiry, and limitations. Contributor consent and eligible-recipient checks are modeled with a trusted mock roster.
-- A Chainlink CRE Confidential Workflow entry point that fetches the snapshot inside a TEE handler and releases only a minimal summary through `usingTheDons()`.
+![QuietSignal project website and interactive scenario dashboard](docs/assets/website-desktop.png)
 
-**This is a controlled local pilot using synthetic observations.** The local operator controls test enrollment and built-in collector keys. Registered-key signatures establish key possession, not event truth or independent organizations. The authenticated pilot is separate from the unauthenticated fictional showcase endpoints, and the server remains loopback-only. The CRE workflow still reads the fictional fixture snapshot and exports only aggregate status; it does not process the pilot database or deliver member briefs through CRE. No real monitoring, production TEE, ZK proof, ACE, CCIP, chain deployment, or firewall enforcement is implemented. Read the [security model](docs/security-model.md) for exact boundaries.
+QuietSignal is a cybersecurity portfolio project exploring selective threat-evidence sharing across organizations. It combines a deterministic correlation/disclosure engine, an authenticated local incident workspace, signed synthetic collectors, persistent state and a Chainlink CRE confidential-workflow entry point.
 
-## Local development
+**Current scope:** the public website demonstrates fictional scenarios. The working persistent backend runs locally. CRE TypeScript/WASM compilation and mock-handler tests pass; native CRE execution and deployed enclave guarantees remain unvalidated. No real-device monitoring, production threat verdicts, ZK proof, ACE, CCIP or firewall enforcement is claimed.
 
-Requires Bun 1.3.11+ (the lockfile was generated with 1.3.11).
+## The problem
+
+One company sees an unfamiliar connection after updating a shared software supplier. That alone may be harmless. Other organizations seeing the same supplier version, destination and unusual process sequence could make it worth investigating—but exchanging full logs exposes employee information, internal infrastructure and unrelated business activity.
+
+QuietSignal tests a narrower approach: correlate scoped observations, then release an explicitly approved evidence brief only when the permitted contributions support it. Recipients get an indicator, relevant software/version, sanitized sequence, coarse search window, corroboration thresholds and limitations. They do not get contributor identities, full logs, credentials or unrelated activity.
+
+A warning is an **investigation lead**, not proof of maliciousness. The test organizations are distinct enrolled identities under one local operator, not independently verified companies.
+
+## Try the demo in two minutes
+
+Open **[angelnycc.github.io/QuietSignal](https://angelnycc.github.io/QuietSignal/)**. No installation, login or CRE API key is needed for the static demonstration.
+
+1. Start with the shared suspicious sequence and inspect the approved evidence brief.
+2. Switch to fifty reports from one company: report volume alone does not establish corroboration.
+3. Compare shared-destination-only, expired-evidence and revoked-member scenarios.
+4. Reset the demo, download the fictional evidence JSON, and inspect the sharing walkthrough.
+
+The website embeds sample outputs generated by the tested core. It makes no external runtime requests; sample evidence times are fixed when built. It does not run the persistent backend or process visitor telemetry. [Hosting details](docs/publishing.md).
+
+## What is implemented
+
+| Component | Behavior |
+| --- | --- |
+| Correlation engine | Matches supplier/version/normalized destination across three enrolled organizations, with two qualifying update → connection → unusual-process sequences within thirty minutes |
+| Evidence release | Recomputes corroboration after contributor consent and supplier/version/domain filtering; checks current recipient eligibility |
+| Collector admission | Ed25519 request signatures, workspace/endpoint binding, persistent nonce replay checks, event-conflict rejection and idempotent fresh-nonce retries |
+| Incident workspace | Persistent incidents, per-principal acknowledgement, approved JSON downloads, operator preview and participant views |
+| Access and administration | Hashed access/session tokens, HttpOnly SameSite cookies, CSRF/Origin enforcement, enrollment, key binding, membership/collector/access revocation and consent controls |
+| Persistence and audit | Transactional SQLite, WAL, schema checks, restart recovery and a scoped local hash-linked audit trail |
+| Public website | Responsive security-themed landing page, five interactive scenarios, selective-disclosure walkthrough, FAQ and keyboard-accessible navigation |
+| CRE entry point | Typed confidential-handler API, constrained synthetic source and redacted aggregate output; compiles to WASM |
+| Quality checks | Adversarial tests, type/format checks, actual HTTP/browser flows and GitHub Actions validation |
+
+![Authenticated local operator workspace showing a synthetic incident and approved evidence](docs/assets/workspace-desktop.png)
+
+<details>
+<summary>View the mobile participant workspace</summary>
+
+<img src="docs/assets/workspace-mobile.png" alt="Mobile participant workspace with an approved fictional incident brief" width="330">
+
+</details>
+
+Screenshots use only disposable synthetic test data. The authenticated workspace shown here is a local pilot, separate from the public static website.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    C[Signed synthetic collectors] --> A[Admission and replay checks]
+    A --> S[(SQLite pilot state)]
+    S --> R[Correlation]
+    P[Membership, consent and release policy] --> R
+    R --> D[Recompute permitted evidence]
+    D --> U[Authenticated participant brief]
+    F[Separate fictional snapshot] --> W[CRE confidential-handler entry point]
+    W --> M[Minimal aggregate summary]
+```
+
+The local pilot and CRE workflow share the deterministic core but are **separate execution paths** today. The CRE workflow reads fictional loopback fixtures, not the pilot database, and does not deliver participant briefs. The public website is a third path: an offline-capable export containing only approved fictional outputs.
+
+See [the architecture walkthrough](docs/architecture.md), [design decisions and tradeoffs](docs/design-decisions.md), and [API contract](docs/api.md).
+
+## Engineering decisions worth reviewing
+
+- **Consent changes the computation.** Filtering identities from a completed result is insufficient; nonconsenting contributions cannot silently support the brief's claimed threshold.
+- **A key is not ground truth.** Signatures establish possession of a registered collector key. Event truth and independent organization enrollment need separate verification.
+- **Disclosure constructs a new record.** Approved fields and fixed sequence vocabulary replace arbitrary log forwarding or unreliable secret scrubbing.
+- **Authorization stays current.** List, detail, acknowledgement and download all reevaluate release permission. Already downloaded evidence cannot be recalled.
+- **Failure behavior is tested.** Streaming-body revocation, concurrent runs, audit rollback, conflicting event identities and restart replay rejection have explicit tests.
+- **Audit claims stay bounded.** The local hash chain detects inconsistent edits but cannot prevent its database owner from rewriting history.
+
+The [design notes](docs/design-decisions.md) discuss limitations, alternatives and why confidential execution, source verification and ZK are different guarantees.
+
+## Run the full local pilot
+
+Requires **Bun 1.3.11**. The initial pilot, website and tests need no Chainlink account credentials.
 
 ```sh
+git clone https://github.com/Angelnycc/QuietSignal.git
+cd QuietSignal
 bun install --frozen-lockfile
-bun test
-bun run typecheck
-bun run build
-bun run demo
 bun run dev
 ```
 
-The last command starts the website, authenticated pilot and fictional fixture service on loopback port 8787. The website is `/`; the pilot workspace is `/app`. On the server machine, choose `.quietsignal/operator-access.json` in the login file picker; it is a generated application credential, not a Chainlink API key. Keep it private and out of chat/Git. Cloud localhost is not your laptop’s localhost, and public website activation is tracked in [the publishing guide](docs/publishing.md).
+On the machine running the server, open `http://127.0.0.1:8787/app` and choose the generated `.quietsignal/operator-access.json` in the login file picker. This is a private local application credential, not a CRE API key. Do not paste or commit its contents. A cloud machine's localhost is not your laptop's localhost.
 
-Start a controlled run, review/acknowledge a brief, issue a participant access file, and test how consent and collector revocation change delivery. See the [pilot guide](docs/local-pilot.md), [API contract](docs/api.md), and [security model](docs/security-model.md). Nothing is blocked or broadcast.
+Start a controlled run, review/acknowledge a brief, issue a participant access file, and test how consent withdrawal and collector revocation change delivery. Built-in scenarios submit real signatures over fictional observations through the same admission endpoint used by the separate collector utility.
+
+The [local pilot guide](docs/local-pilot.md) covers collector registration/submission, roles, revocation, backup/recovery, resource limits and browser checks. The backend stays loopback-only and stores local data in plaintext SQLite; remote production operation needs additional controls.
+
+## Validate the implementation
 
 ```sh
+bun test
+bun run typecheck
 bun run format:check
+bunx --no-install cre-setup
+bun run build
+bun run build:web
+bun run check:web
 bun run check:pilot
 ```
 
-The pilot browser check uses an isolated temporary database and generated test credentials, never your development access files. It checks real HTTP flows, all five scenarios, downloads, consent, revocation, participant permissions, audit and mobile layout.
+Recorded local validation: **73 tests, 299 assertions**, passing type/format checks and a successful WASM build. Browser suites cover all five scenarios, JSON export, keyboard interactions, five viewport widths, signed pilot flows, participant isolation, consent, revocation, audit and sign-out. Tests use generated disposable credentials; development access files are never read by browser checks.
 
-## Website
+Browser suites require Python Playwright and Chromium. See [CONTRIBUTING.md](CONTRIBUTING.md) for an isolated setup and the CI badge above for current remote results. Native CRE simulation is a separate, currently unvalidated check requiring supported authentication; [the validation record](docs/validation.md) distinguishes every level.
 
-The security-themed website combines the project overview, an animated consortium diagram, a three-step product walkthrough, the scenario dashboard, a selective-disclosure walkthrough, architecture/status information, and an FAQ. The dashboard supports scenario reset and download of the approved fictional evidence brief as JSON. Disclosure tabs and the mobile navigation support keyboard interaction.
+## Technology
 
-```sh
-bun run build:web
-```
-
-This generates a self-contained static website at `dist/index.html`. It uses no external fonts, analytics, images, or runtime network calls. Its five fictional scenario outputs are generated from the same tested correlation and disclosure functions. The static build is prepared for GitHub Pages in the dedicated [Angelnycc/QuietSignal](https://github.com/Angelnycc/QuietSignal) repository. See [publication status](docs/publishing.md) for hosting activation and verification.
-
-For repeatable browser verification, with Python Playwright and Chromium installed:
-
-```sh
-bun run check:web
-```
-
-The check exercises all scenarios, the evidence JSON download, disclosure tabs, FAQ, internal links, mobile navigation, and five screen widths. Screenshots are written to `dist/website-checks`. The cloud browser blocks file URLs, so the check loads the exported document's exact contents without altering browser policy. It verifies that no external network request occurs.
-
-For a standalone review demo, run `bun run export:demo` and open `dist/quietsignal-demo.html` in a browser. All five scenarios work offline with fixed fictional outputs produced by the same correlation and disclosure functions. No credentials, installation on the reviewer's computer, or deployment is needed. The demo contains no raw roster or event records.
-
-CRE authentication and deployment access are not prerequisites for this local prototype. CRE runtime authentication and confidential deployment remain deferred; publishing the synthetic website is a separate operation.
-
-## Native CRE simulation
-
-Requires the CRE CLI (prepared cloud version: v1.38.0), a Chainlink account authenticated in the execution environment, and the SDK WASM tools:
-
-```sh
-cd correlation
-bunx cre-setup
-cd ..
-```
-
-Keep `bun run dev` running in another terminal, then from the project root:
-
-```sh
-cre workflow simulate correlation --target local-simulation --non-interactive --trigger-index 0
-```
-
-Do not add `--broadcast`. The local handler has no report, receiver, EVM client, or transaction path. Local simulation does not require Confidential Workflows private-beta enrollment, but deployed confidential execution does. Authentication is not inherited from a login on a different computer. Use browser-completed `cre login` on a suitable machine, or securely supply an approved `CRE_API_KEY` through environment settings. Never commit credentials or paste them in chat.
-
-**Validation status:** see `docs/validation.md`. Unit tests or the Bun demo are not substitutes for native CRE simulation.
-
-## Privacy boundary
-
-The local fixture source exposes its synthetic roster and observations to the developer. In a deployed design, full source records and contributor identifiers stay within the authorized processing boundary. An explicit disclosure policy selects useful evidence for trusted recipients; useful indicators are not inherently secret. The CRE workflow returns only mode, policy version, evaluation time, expiry, and a status. It returns no raw domain hash, avoiding publication of a guessable domain commitment. The local `/api/member-demo` route remains a fixed-recipient fictional showcase. The `/api/pilot` routes authenticate participants and recheck current release permission for every list/detail/review/download request. The local database and host are trusted; remote encrypted delivery and confidential processing of pilot records remain unimplemented.
-
-This is a TEE design, not a claim of zero-knowledge security. Local simulation does not provide enclave confidentiality. Even a deployed TEE cannot establish that an upstream source told the truth. Threshold warnings indicate corroboration, not proof of maliciousness. Public status and timing can still leak aggregate information; production requires an explicit output policy.
+| Area | Choice |
+| --- | --- |
+| Application/runtime | TypeScript 5.9.3 and Bun 1.3.11 |
+| Validation and storage | Zod 3.25.76 and Bun SQLite |
+| Collector authentication | Ed25519, SHA-256, request-context binding and persistent nonces |
+| UI | Responsive HTML/CSS and vanilla JavaScript; dynamic values rendered through DOM text APIs |
+| Workflow | Chainlink CRE SDK 1.18.0; official confidential-handler entry point; WASM build |
+| Verification/delivery | Bun tests, Python Playwright 1.62.0, Chromium, GitHub Actions and GitHub Pages |
 
 ## Next milestones
 
-1. Review the tested local pilot and its selective evidence release behavior.
-2. Add independently managed membership and one narrowly scoped authenticated source connector. Test the source-authenticity statement explicitly; collector signatures alone do not prove events occurred.
-3. Connect authorized pilot snapshots and recipient release decisions to confidential CRE execution. Keep member briefs out of ordinary DON logs and public reports.
-4. When ready, validate native CRE simulation using supported authentication, then separately validate deployed confidential execution with a documented threat model.
-5. Prepare remote TLS, identity/key management, retention/encryption, inference controls and an independent review before external use. Add ACE access policy and CCIP delivery only where their guarantees are needed.
-6. Confirm a supported DECO integration for a specific source-verification requirement; do not assume it supplies private correlation or anonymous membership automatically.
+1. Add independently managed enrollment and one narrowly scoped authenticated evidence connector.
+2. Connect authorized snapshots and recipient-specific release decisions to confidential CRE execution; keep plaintext member briefs out of ordinary DON logs/public reports.
+3. Validate native CRE simulation, then separately validate deployed confidential execution and its threat model.
+4. Add managed identity/key lifecycle, TLS, retention/encryption, inference controls and an external review before remote multi-organization use.
+5. Evaluate ACE, CCIP or a supported DECO/ZK integration only against a concrete access, delivery or source-verification requirement.
 
-A GitHub Actions workflow is prepared to run the locked install, tests, type/format checks, workflow build and browser suites without account credentials; remote execution is unverified. The user has now authorized publication of the tested pilot and website to Angelnycc/QuietSignal. Source publication, static hosting and confidential CRE deployment are separate milestones; see [publication status](docs/publishing.md).
+These are planned integrations, not capabilities supplied automatically by the current CRE dependency.
 
-## Development guidance
+## Documentation and project scope
 
-Use the existing isolated checkout; do not create a Git worktree unless explicitly requested. Chainlink's CRE skill is installed locally under `.agents/skills/chainlink-cre-skill` and ignored by Git. To install it on another checkout:
+[Architecture](docs/architecture.md) · [Design decisions](docs/design-decisions.md) · [Evidence policy](docs/evidence-sharing.md) · [Security model](docs/security-model.md) · [API](docs/api.md) · [Local operation](docs/local-pilot.md) · [Validation](docs/validation.md) · [Contributing](CONTRIBUTING.md) · [Security reporting](SECURITY.md)
 
-```sh
-npx skills add smartcontractkit/chainlink-agent-skills --skill chainlink-cre-skill --agent codex --yes --copy
-```
-
-The official confidential TypeScript template was copied after `cre init` failed for missing cloud authentication; all sample workflow logic/configuration was replaced. Sources: [CRE skill](https://github.com/smartcontractkit/chainlink-agent-skills/tree/main/chainlink-cre-skill), [Confidential Workflows](https://docs.chain.link/cre/concepts/confidential-workflows), [access](https://docs.chain.link/cre/account/confidential-workflows-access).
+Built as an independent cybersecurity portfolio/research project by [Angelnycc](https://github.com/Angelnycc). The official CRE TypeScript template and [Chainlink CRE skill](https://github.com/smartcontractkit/chainlink-agent-skills/tree/main/chainlink-cre-skill) informed the workflow setup. The implementation and documentation distinguish the working prototype from production security guarantees; it is not represented as an audited or deployed Chainlink security product.

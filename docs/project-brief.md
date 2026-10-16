@@ -12,7 +12,7 @@ Development happens through Codex in the cloud workspace; no local Codex or Clau
 
 Read README.md and docs/validation.md for commands, current evidence, and blockers. Keep real logs and credentials out of chats, Git, public summaries, and demo fixtures.
 
-The website showcases the project with a dark security theme, a consortium diagram, an interactive five-scenario dashboard, an evidence-sharing walkthrough, and architecture/status information. `bun run build:web` creates a portable static site with no account or API key needed to explore. It is not publicly hosted yet.
+The website showcases the project with a dark security theme, a consortium diagram, an interactive five-scenario dashboard, an evidence-sharing walkthrough, and architecture/status information. `bun run build:web` creates a portable static site with no account or API key needed to explore. The synthetic static website is published at https://angelnycc.github.io/QuietSignal/; GitHub reports successful deployment. The persistent backend remains local.
 
 ## Implemented local pilot
 

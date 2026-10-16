@@ -17,3 +17,4 @@ skills-lock.json
 *.pem
 *.key
 *-access.json
+.venv/
