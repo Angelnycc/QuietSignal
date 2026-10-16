@@ -30,7 +30,7 @@ bun run demo
 bun run dev
 ```
 
-The last command starts the website, authenticated pilot and fictional fixture service on loopback port 8787. The website is `/`; the pilot workspace is `/app`. On the server machine, choose `.quietsignal/operator-access.json` in the login file picker; it is a generated application credential, not a Chainlink API key. Keep it private and out of chat/Git. Cloud localhost is not your laptop’s localhost, and this repository has no public preview configured.
+The last command starts the website, authenticated pilot and fictional fixture service on loopback port 8787. The website is `/`; the pilot workspace is `/app`. On the server machine, choose `.quietsignal/operator-access.json` in the login file picker; it is a generated application credential, not a Chainlink API key. Keep it private and out of chat/Git. Cloud localhost is not your laptop’s localhost, and public website activation is tracked in [the publishing guide](docs/publishing.md).
 
 Start a controlled run, review/acknowledge a brief, issue a participant access file, and test how consent and collector revocation change delivery. See the [pilot guide](docs/local-pilot.md), [API contract](docs/api.md), and [security model](docs/security-model.md). Nothing is blocked or broadcast.
 
@@ -49,7 +49,7 @@ The security-themed website combines the project overview, an animated consortiu
 bun run build:web
 ```
 
-This generates a self-contained static website at `dist/index.html`. It uses no external fonts, analytics, images, or runtime network calls. Its five fictional scenario outputs are generated from the same tested correlation and disclosure functions. The site is prepared for static hosting but has not been published, and no public preview URL is configured.
+This generates a self-contained static website at `dist/index.html`. It uses no external fonts, analytics, images, or runtime network calls. Its five fictional scenario outputs are generated from the same tested correlation and disclosure functions. The static build is prepared for GitHub Pages in the dedicated [Angelnycc/QuietSignal](https://github.com/Angelnycc/QuietSignal) repository. See [publication status](docs/publishing.md) for hosting activation and verification.
 
 For repeatable browser verification, with Python Playwright and Chromium installed:
 
@@ -61,7 +61,7 @@ The check exercises all scenarios, the evidence JSON download, disclosure tabs, 
 
 For a standalone review demo, run `bun run export:demo` and open `dist/quietsignal-demo.html` in a browser. All five scenarios work offline with fixed fictional outputs produced by the same correlation and disclosure functions. No credentials, installation on the reviewer's computer, or deployment is needed. The demo contains no raw roster or event records.
 
-CRE authentication and deployment access are not prerequisites for this local prototype. We are deferring deployment requests while the first version is being designed and reviewed.
+CRE authentication and deployment access are not prerequisites for this local prototype. CRE runtime authentication and confidential deployment remain deferred; publishing the synthetic website is a separate operation.
 
 ## Native CRE simulation
 
@@ -98,7 +98,7 @@ This is a TEE design, not a claim of zero-knowledge security. Local simulation d
 5. Prepare remote TLS, identity/key management, retention/encryption, inference controls and an independent review before external use. Add ACE access policy and CCIP delivery only where their guarantees are needed.
 6. Confirm a supported DECO integration for a specific source-verification requirement; do not assume it supplies private correlation or anonymous membership automatically.
 
-A GitHub Actions workflow is prepared to run the locked install, tests, type/format checks, workflow build and browser suites without account credentials; remote execution is unverified. GitHub creation/upload and deployment remain deferred as requested. Local commits preserve this implementation; no public URL or remote repository publication is implied.
+A GitHub Actions workflow is prepared to run the locked install, tests, type/format checks, workflow build and browser suites without account credentials; remote execution is unverified. The user has now authorized publication of the tested pilot and website to Angelnycc/QuietSignal. Source publication, static hosting and confidential CRE deployment are separate milestones; see [publication status](docs/publishing.md).
 
 ## Development guidance
 

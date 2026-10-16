@@ -1,5 +1,7 @@
-# Website publication status
+# Website publication
 
-The user requires a separate QuietSignal repository and explicitly forbids changes or deployments under Angelnycc/sports-settlement-oracle. The mistakenly created preview branch was removed after verifying its exact original commit. GitHub Pages was never enabled and the original main branch was unchanged. Do not reuse that repository.
+The user-provided repository is https://github.com/Angelnycc/QuietSignal.git. It is public and Git/API access was verified on 2026-10-16. Publish only to this repository. Do not use or modify sports-settlement-oracle.
 
-The user is manually creating a new repository. Obtain its URL, verify the existing GitHub connection can access it, then publish only to that repository. Use Public visibility for free GitHub Pages, initialize no README/license/gitignore because the local QuietSignal repository already contains files, and preserve all local work. No API key or personal token should be requested in chat. Public hosting remains unconfigured; do not describe an expected address as live.
+The tested source belongs on main. The generated, self-contained dist/index.html belongs on the separate gh-pages branch together with .nojekyll. Only fictional approved outputs are embedded in that website; no raw roster, event records, private access/collector files or backend state should be deployed. The static website contains five interactive scenarios, approved evidence downloads, selective-sharing walkthrough, FAQ and mobile navigation. It does not host the authenticated persistent backend or real monitoring.
+
+For GitHub Pages, the repository owner can select Settings → Pages → Deploy from a branch → gh-pages → / (root) → Save. The expected address is https://angelnycc.github.io/QuietSignal/ after a successful build. Do not describe it as live before Pages activation and successful deployment are verified. If the GitHub integration cannot enable Pages (HTTP 403), prepare and push the branch, then request only that account setting. No CRE API key or personal token is needed in chat.

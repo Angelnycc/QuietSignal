@@ -35,8 +35,8 @@ CRE CLI v1.38.0 was installed after checking the published archive checksum and 
 
 The existing sports-settlement-oracle checkout remains unchanged.
 
-A GitHub Actions workflow is prepared with pinned Bun/Playwright versions, a pinned checkout action, read-only repository permissions, frozen dependency installation, tests/type/format checks, WASM compilation and both browser suites. It has not run on GitHub; publication remains deferred. Local runs of its substantive checks are the evidence recorded above.
+A GitHub Actions workflow is prepared with pinned Bun/Playwright versions, a pinned checkout action, read-only repository permissions, frozen dependency installation, tests/type/format checks, WASM compilation and both browser suites. Its local checks passed; inspect GitHub Actions after publication for remote results. Local runs of its substantive checks are the evidence recorded above.
 
 API-key creation and deployment requests are deferred at the user's direction. They are not required to develop or review this prototype. Headless cloud CLI authentication is a later integration step; local browser-based CRE login supports simulation without requesting deployment access.
 
-The website has not been publicly hosted. GitHub creation/upload remains deferred. The site's status section distinguishes the local prototype from future CRE, source-authenticity, encrypted-delivery, ACE, CCIP, and DECO/ZK integrations.
+The user has now created Angelnycc/QuietSignal and authorized publication there. Check docs/publishing.md for current source/hosting status. The site's status section distinguishes the local prototype from future CRE, source-authenticity, encrypted-delivery, ACE, CCIP, and DECO/ZK integrations.
