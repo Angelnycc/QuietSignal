@@ -27,6 +27,8 @@ export interface SessionRow {
   organization_id: string | null
   expires_at: number
 }
+export const sessionPrincipal = (session: SessionRow) =>
+  session.role === 'operator' ? 'operator' : 'member:' + session.organization_id
 export interface IncidentRow {
   id: string
   run_id: string
@@ -180,11 +182,14 @@ export class PilotStore {
       observations: rows.map((row) => JSON.parse(row.payload) as Observation),
     }
   }
+  findIncident(run: string, tuple: string[]): IncidentRow | null {
+    return this.db
+      .query('SELECT * FROM incidents WHERE fingerprint=?')
+      .get(digest(canonical([run, ...tuple]))) as IncidentRow | null
+  }
   incident(run: string, tuple: string[], now: number): IncidentRow {
     const fingerprint = digest(canonical([run, ...tuple]))
-    const existing = this.db
-      .query('SELECT * FROM incidents WHERE fingerprint=?')
-      .get(fingerprint) as IncidentRow | null
+    const existing = this.findIncident(run, tuple)
     if (existing) {
       this.db.query('UPDATE incidents SET last_seen=? WHERE id=?').run(now, existing.id)
       return { ...existing, last_seen: now }

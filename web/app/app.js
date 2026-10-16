@@ -16,7 +16,8 @@ const date = (value) =>
     timeZoneName: 'short',
   }).format(new Date(value))
 let toastTimer,
-  renderVersion = 0
+  renderVersion = 0,
+  authVersion = 0
 function syncNavigation() {
   document
     .querySelectorAll('[data-view]')
@@ -36,6 +37,7 @@ function toast(message, error = false) {
   toastTimer = setTimeout(() => ($('toast').hidden = true), 4500)
 }
 function showLogin() {
+  authVersion++
   renderVersion++
   state.view = 'incidents'
   syncNavigation()
@@ -49,6 +51,7 @@ function showLogin() {
   $('access-file').value = ''
 }
 async function api(path, method = 'GET', body) {
+  const version = authVersion
   const headers = {}
   if (body !== undefined) headers['Content-Type'] = 'application/json'
   if (method !== 'GET' && state.session) headers['X-QS-CSRF'] = state.session.csrf
@@ -60,7 +63,7 @@ async function api(path, method = 'GET', body) {
   })
   const result = await response.json()
   if (!response.ok) {
-    if (response.status === 401) showLogin()
+    if (response.status === 401 && version === authVersion) showLogin()
     throw new Error(result.error?.message || 'Workspace request failed')
   }
   return result
@@ -105,19 +108,13 @@ function panel(title, description) {
 function setView(name) {
   state.view = name
   state.selected = null
-  document
-    .querySelectorAll('[data-view]')
-    .forEach((b) => b.classList.toggle('active', b.dataset.view === name))
-  $('page-title').textContent = {
-    incidents: 'Incident workspace',
-    collectors: 'Registered collectors',
-    policies: 'Sharing policy',
-    audit: 'Audit trail',
-  }[name]
+  syncNavigation()
   loadView().catch((e) => toast(e.message, true))
 }
 async function loadSession() {
+  const version = authVersion
   const session = await api('/session')
+  if (version !== authVersion) return
   if (!session.authenticated) {
     showLogin()
     return
@@ -651,8 +648,9 @@ $('refresh').addEventListener('click', () =>
 $('logout').addEventListener('click', async () => {
   try {
     await api('/logout', 'POST', {})
-  } finally {
     showLogin()
+  } catch (error) {
+    toast('Could not complete sign out. Retry while connected.', true)
   }
 })
 document

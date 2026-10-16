@@ -1,8 +1,8 @@
+import { policy } from '../correlation/defaults'
 import { createHash } from 'node:crypto'
 import { correlate } from '../correlation/model'
-import { buildEvidenceBriefs } from '../correlation/evidence'
-import { disclosurePolicy } from '../scripts/disclosure'
-import { fixture, policy, scenarios, type Scenario } from '../scripts/fixtures'
+import { scenarioResult } from '../demo/scenarios'
+import { fixture, scenarios, type Scenario } from '../demo/fixtures'
 import type { PilotApi } from './api'
 
 export function createLocalServer(state: { api: PilotApi }) {
@@ -116,18 +116,7 @@ export function createLocalServer(state: { api: PilotApi }) {
             ? snapshot
             : url.pathname === '/api/demo'
               ? { scenario, ...correlate(snapshot, policy, now).summary }
-              : {
-                  scenario,
-                  ...correlate(snapshot, policy, now).summary,
-                  evidenceBriefs: buildEvidenceBriefs(
-                    snapshot,
-                    policy,
-                    disclosurePolicy,
-                    'demo-alpha',
-                    now
-                  ),
-                  deliveryMode: 'synthetic-local-demo',
-                }
+              : scenarioResult(scenario as Scenario, now)
         response = Response.json(output, { headers: { 'Cache-Control': 'no-store' } })
       } else response = new Response('Not found', { status: 404 })
       response.headers.set('X-Content-Type-Options', 'nosniff')

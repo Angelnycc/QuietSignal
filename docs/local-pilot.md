@@ -11,7 +11,7 @@ bun install --frozen-lockfile
 bun run dev
 ```
 
-On the **machine running that command**, open `http://127.0.0.1:8787/app`. Choose `.quietsignal/operator-access.json` in the login file picker. This application-generated credential is separate from a Chainlink account or API key. The server prints the file's path, never its contents. If the server runs in a cloud workspace, your laptop's localhost and file chooser do not point to the cloud machine; a supported preview or deployment would be needed for remote browser access. No public hosting is configured here.
+On the **machine running that command**, open `http://127.0.0.1:8787/app`. Choose `.quietsignal/operator-access.json` in the login file picker. This application-generated credential is separate from a Chainlink account or API key. The server prints the file's path, never its contents. If the server runs in a cloud workspace, your laptop's localhost and file chooser do not point to the cloud machine. The public GitHub Pages website hosts only the fictional static showcase; this persistent backend is not publicly hosted.
 
 The operator access file grants full pilot administration. Keep it off chat, screenshots, source control, and shared downloads. Private local state has a directory mode of 0700 and key/access files use 0600 on Unix systems. The browser clears the login inputs after use and does not store credentials in localStorage.
 
@@ -53,8 +53,10 @@ The utility only sends to a loopback HTTP origin, refuses redirects, and has a t
 - Missing or mismatched operator/collector files fail startup. There is no silent administrator reset. Do not delete individual access files hoping to recover access; restore matching state instead. Starting a separate empty state directory creates a distinct workspace, not access to the old one.
 - Participant access files expire after at most seven days; sessions after at most eight hours. **Revoke access files** invalidates all that member's participant keys and sessions. Membership deactivation invalidates sessions and excludes evidence; membership reactivation can allow an otherwise valid, unrevoked access file to log in again.
 - The feed evaluates only the active run, current consent, membership, collector activation, release allowlists, and evidence validity. List, detail, acknowledgement and download routes all recheck disclosure. Previously downloaded evidence cannot be recalled. The UI refreshes the incident feed every fifteen seconds while visible; it does not overwrite unfinished policy forms with background refreshes.
+- An empty recipient allowlist suspends all brief delivery, including operator previews. Restoring eligible recipients restores otherwise valid evidence. Supplier display names are labels, not incident identifiers. Independent matching findings expire according to their own evidence.
 - JSON admission is limited to 16 KiB, login to 4 KiB, and the outer HTTP server to 32 KiB. A run admits at most 1,000 observations; enrollment is bounded at 100 organizations and 20 collectors per organization. Signatures allow two minutes of clock skew. Nonces persist for five minutes. Process-local one-minute limits include 600 ingestion attempts per address, 120 per collector, eight login attempts per address, and sixty mutations per session.
 - Earlier runs and audit records are retained. Automatic retention, total disk quotas, distributed rate limiting, key-management services and production availability controls are not implemented. Use synthetic data and keep this server loopback-only.
+- Rejection audit entries are sampled to at most thirty per address per minute, with no audit append for rate-limit errors. Accepted evidence/policy actions remain audited; rejected-request sampling is not a complete incident ledger.
 
 ## Checks
 

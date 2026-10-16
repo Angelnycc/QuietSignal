@@ -1,8 +1,9 @@
+import { policy } from '../correlation/defaults'
 import { describe, expect, test } from 'bun:test'
 import { buildEvidenceBriefs } from '../correlation/evidence'
 import { correlate } from '../correlation/model'
-import { fixture, policy } from '../scripts/fixtures'
-import { disclosurePolicy } from '../scripts/disclosure'
+import { fixture } from '../demo/fixtures'
+import { disclosurePolicy } from '../correlation/defaults'
 
 const now = 1_800_000_123_456
 const snapshot = () => fixture('correlated', now)
@@ -10,6 +11,29 @@ const briefs = (input = snapshot(), releasePolicy = disclosurePolicy, recipient 
   buildEvidenceBriefs(input, policy, releasePolicy, recipient, now)
 
 describe('selective evidence sharing (synthetic policy, no production authentication)', () => {
+  test('an unrelated soon-expiring finding does not shorten another brief', () => {
+    const input = snapshot()
+    input.observations.push(
+      ...input.observations.map((event) => ({
+        ...event,
+        eventId: event.eventId + '-older',
+        destination: 'older.example',
+        kind: 'post-update-process-chain' as const,
+        updateAtMs: now - policy.windowMs + 1,
+        connectionAtMs: now - policy.windowMs + 2,
+        childProcessAtMs: now - policy.windowMs + 3,
+      }))
+    )
+    const output = briefs(input, {
+      ...disclosurePolicy,
+      approvedDomains: [...disclosurePolicy.approvedDomains, 'older.example'],
+    })
+    expect(output).toHaveLength(2)
+    expect(output.find((b) => b.indicator.value === 'older.example')!.expiresAtMs).toBe(now + 1)
+    expect(output.find((b) => b.indicator.value !== 'older.example')!.expiresAtMs).toBe(
+      now + policy.maxSnapshotAgeMs
+    )
+  })
   test('shares an approved indicator, software version, pattern, and limitations', () => {
     const result = briefs()
     expect(result).toHaveLength(1)
@@ -35,9 +59,20 @@ describe('selective evidence sharing (synthetic policy, no production authentica
   })
   test('only reports threshold counts, even with additional contributors', () => {
     const input = snapshot()
-    input.members.push({ ...input.members[0]!, organizationId: 'fourth-member', collectorIds: ['fourth-collector'] })
-    input.observations.push({ ...input.observations[0]!, organizationId: 'fourth-member', collectorId: 'fourth-collector' })
-    expect(briefs(input)[0]!.corroboration).toEqual({ organizationsAtLeast: 3, sequenceOrganizationsAtLeast: 2 })
+    input.members.push({
+      ...input.members[0]!,
+      organizationId: 'fourth-member',
+      collectorIds: ['fourth-collector'],
+    })
+    input.observations.push({
+      ...input.observations[0]!,
+      organizationId: 'fourth-member',
+      collectorId: 'fourth-collector',
+    })
+    expect(briefs(input)[0]!.corroboration).toEqual({
+      organizationsAtLeast: 3,
+      sequenceOrganizationsAtLeast: 2,
+    })
   })
   test('coarsens the search window while retaining useful expiry', () => {
     const brief = briefs()[0]!
@@ -48,19 +83,27 @@ describe('selective evidence sharing (synthetic policy, no production authentica
     expect(brief.expiresAtMs).toBeGreaterThan(now)
   })
   test('requires the recipient to be both enrolled and allowed by the release policy', () => {
-    expect(() => briefs(snapshot(), disclosurePolicy, 'unknown')).toThrow('Recipient is not eligible')
-    expect(() => briefs(snapshot(), { ...disclosurePolicy, recipients: ['demo-bravo'] })).toThrow('Recipient is not eligible')
+    expect(() => briefs(snapshot(), disclosurePolicy, 'unknown')).toThrow(
+      'Recipient is not eligible'
+    )
+    expect(() => briefs(snapshot(), { ...disclosurePolicy, recipients: ['demo-bravo'] })).toThrow(
+      'Recipient is not eligible'
+    )
   })
   test('revoked, expired, and not-yet-active recipients cannot receive evidence', () => {
-    const input = snapshot(); input.members[0]!.active = false
+    const input = snapshot()
+    input.members[0]!.active = false
     expect(() => briefs(input)).toThrow('Recipient is not eligible')
-    input.members[0]!.active = true; input.members[0]!.expiresAtMs = now
+    input.members[0]!.active = true
+    input.members[0]!.expiresAtMs = now
     expect(() => briefs(input)).toThrow('Recipient is not eligible')
-    input.members[0]!.expiresAtMs = now + 1000; input.members[0]!.validFromMs = now + 1
+    input.members[0]!.expiresAtMs = now + 1000
+    input.members[0]!.validFromMs = now + 1
     expect(() => briefs(input)).toThrow('Recipient is not eligible')
   })
   test('withdrawing evidence-sharing consent removes that member from corroboration', () => {
-    const input = snapshot(); input.members[2]!.shareEvidenceWithConsortium = false
+    const input = snapshot()
+    input.members[2]!.shareEvidenceWithConsortium = false
     expect(correlate(input, policy, now).summary.status).toBe('corroborated-pattern')
     expect(briefs(input)).toEqual([])
   })
@@ -90,7 +133,12 @@ describe('selective evidence sharing (synthetic policy, no production authentica
     expect(JSON.stringify(result.summary)).not.toContain(briefs()[0]!.indicator.value)
   })
   test('uncorroborated scenarios do not release an evidence brief', () => {
-    for (const scenario of ['duplicate-reports', 'benign-overlap', 'expired', 'revoked-member'] as const) {
+    for (const scenario of [
+      'duplicate-reports',
+      'benign-overlap',
+      'expired',
+      'revoked-member',
+    ] as const) {
       expect(briefs(fixture(scenario, now))).toEqual([])
     }
   })

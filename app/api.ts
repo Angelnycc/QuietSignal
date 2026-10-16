@@ -1,14 +1,11 @@
 import { randomUUID, type KeyObject } from 'node:crypto'
 import { z, ZodError } from 'zod'
-import { correlate, observationSchema, type Observation } from '../correlation/model'
-import {
-  buildEvidenceBriefs,
-  disclosurePolicySchema,
-  type EvidenceBrief,
-} from '../correlation/evidence'
-import { policy } from '../scripts/fixtures'
-import { fixture, scenarios, type Scenario } from '../scripts/fixtures'
-import { disclosurePolicy as defaultDisclosure } from '../scripts/disclosure'
+import { observationSchema, normalizeDomain } from '../correlation/model'
+import { disclosurePolicySchema } from '../correlation/evidence'
+import { IncidentService } from './incidents'
+import { policy } from '../correlation/defaults'
+import { fixture, scenarios, type Scenario } from '../demo/fixtures'
+import { disclosurePolicy as defaultDisclosure } from '../correlation/defaults'
 import {
   canonical,
   constantTimeToken,
@@ -19,7 +16,7 @@ import {
   signObservation,
   verifyObservation,
 } from './security'
-import { PilotStore, type Role, type SessionRow, type IncidentRow } from './store'
+import { PilotStore, type Role, type SessionRow, sessionPrincipal as actor } from './store'
 
 const id = z.string().regex(/^[a-z][a-z0-9-]{0,63}$/)
 const boolean = z.boolean()
@@ -57,11 +54,9 @@ class ApiError extends Error {
 function fail(status: number, code: string, message: string): never {
   throw new ApiError(status, code, message)
 }
-const actor = (session: SessionRow) =>
-  session.role === 'operator' ? 'operator' : 'member:' + session.organization_id
-
 export class PilotApi {
   readonly limiter = new RateLimiter()
+  private readonly incidents: IncidentService
   private readonly now: () => number
   private simulationActive = false
   constructor(
@@ -69,6 +64,7 @@ export class PilotApi {
     readonly options: PilotOptions
   ) {
     this.now = options.now ?? Date.now
+    this.incidents = new IncidentService(store)
     if (options.bootstrapToken.length < 32)
       throw new Error('A generated local access token is required')
     if (
@@ -125,9 +121,6 @@ export class PilotApi {
       }
       if (!store.meta('disclosure')) store.setMeta('disclosure', canonical(defaultDisclosure))
     })()
-  }
-  private disclosure() {
-    return disclosurePolicySchema.parse(JSON.parse(this.store.meta('disclosure')!))
   }
   private cookie(request: Request): string | null {
     const value = request.headers
@@ -228,70 +221,6 @@ export class PilotApi {
       (this.options.origin.startsWith('https:') ? '; Secure' : '')
     )
   }
-  private refresh() {
-    const run = this.store.meta('active_run')
-    if (!run) return
-    const result = correlate(this.store.snapshot(this.now()), policy, this.now())
-    for (const finding of result.privateFindings) {
-      this.store.incident(
-        run,
-        [finding.supplierId, finding.softwareVersion, finding.destination],
-        this.now()
-      )
-    }
-  }
-  private visible(session: SessionRow) {
-    const disclosure = this.disclosure()
-    const snapshot = this.store.snapshot(this.now())
-    const recipients =
-      session.role === 'participant' ? [session.organization_id!] : disclosure.recipients
-    let briefs: EvidenceBrief[] = []
-    for (const recipient of recipients) {
-      const member = snapshot.members.find((m) => m.organizationId === recipient)
-      if (
-        !member?.active ||
-        member.validFromMs > this.now() ||
-        member.expiresAtMs <= this.now() ||
-        !disclosure.recipients.includes(recipient)
-      )
-        continue
-      briefs = buildEvidenceBriefs(snapshot, policy, disclosure, recipient, this.now())
-      // Operator gets an explicitly labeled preview of currently releasable
-      // evidence, not a bypass of disclosure rules or a raw event feed.
-      if (session.role === 'operator') break
-    }
-    const run = this.store.meta('active_run') ?? ''
-    return briefs.flatMap((brief) => {
-      const suppliers = disclosure.suppliers.filter(
-        (s) =>
-          s.displayName === brief.supplier.name &&
-          s.approvedVersions.includes(brief.supplier.version)
-      )
-      if (suppliers.length !== 1) return []
-      const fingerprint = digest(
-        canonical([run, suppliers[0]!.id, brief.supplier.version, brief.indicator.value])
-      )
-      const incident = this.store.db
-        .query('SELECT * FROM incidents WHERE fingerprint=?')
-        .get(fingerprint) as IncidentRow | null
-      if (!incident) return []
-      const review = this.store.db
-        .query('SELECT reviewed_at FROM reviews WHERE incident_id=? AND principal=?')
-        .get(incident.id, actor(session)) as { reviewed_at: number } | null
-      return [
-        {
-          id: incident.id,
-          firstRecognizedAtMs: incident.first_seen,
-          reviewStatus: review ? 'acknowledged' : 'new',
-          collectorVerification:
-            'Ed25519 registered-key signatures checked on admission; event truth is not established',
-          reviewedAtMs: review?.reviewed_at ?? null,
-          operatorPreview: session.role === 'operator',
-          brief,
-        },
-      ]
-    })
-  }
   private async ingest(request: Request, clientIp: string) {
     if (!this.limiter.take('ingest-ip:' + clientIp, 600, this.now()))
       fail(429, 'RATE_LIMITED', 'Ingestion rate limit reached')
@@ -338,6 +267,8 @@ export class PilotApi {
     }
     const envelope = envelopeSchema.parse(this.parse(raw))
     const event = envelope.observation
+    if (!normalizeDomain(event.destination))
+      fail(422, 'INDICATOR_REJECTED', 'Observation destination must be a valid domain')
     const member = this.store.member(collector.organization_id)
     if (
       !member?.active ||
@@ -421,7 +352,7 @@ export class PilotApi {
         { synthetic: true },
         this.now()
       )
-      this.refresh()
+      this.incidents.refresh(this.now())
       return { status: 'accepted' as const }
     })()
     return result
@@ -458,14 +389,21 @@ export class PilotApi {
       const runId = this.startRun(scenario, reset, session)
       const sample = fixture(scenario, this.now())
       if (scenario === 'revoked-member') {
-        this.store.db.query('UPDATE organizations SET active=0 WHERE id=?').run('demo-charlie')
-        this.store.audit(
-          actor(session),
-          'membership_revoked',
-          'demo-charlie',
-          { controlledScenario: true },
-          this.now()
-        )
+        this.store.db.transaction(() => {
+          this.store.db.query('UPDATE organizations SET active=0 WHERE id=?').run('demo-charlie')
+          this.store.db
+            .query(
+              'DELETE FROM sessions WHERE key_id IN (SELECT id FROM access_keys WHERE organization_id=?)'
+            )
+            .run('demo-charlie')
+          this.store.audit(
+            actor(session),
+            'membership_revoked',
+            'demo-charlie',
+            { controlledScenario: true },
+            this.now()
+          )
+        })()
       }
       let accepted = 0
       let rejected = 0
@@ -616,7 +554,7 @@ export class PilotApi {
       }
       if (path === '/api/pilot/incidents' && request.method === 'GET') {
         return reply({
-          incidents: this.visible(session),
+          incidents: this.incidents.visible(session, this.now()),
           operatorPreview: session.role === 'operator',
           activeRun: this.store.meta('active_run'),
         })
@@ -624,7 +562,9 @@ export class PilotApi {
       const incidentPath =
         /^\/api\/pilot\/incidents\/([a-f0-9-]{36})(\/acknowledge|\/download)?$/.exec(path)
       if (incidentPath) {
-        const incident = this.visible(session).find((i) => i.id === incidentPath[1])
+        const incident = this.incidents
+          .visible(session, this.now())
+          .find((i) => i.id === incidentPath[1])
         if (!incident)
           fail(404, 'NOT_FOUND', 'Incident is unavailable under your current evidence permissions')
         if (!incidentPath[2] && request.method === 'GET') return reply({ incident })
@@ -792,10 +732,12 @@ export class PilotApi {
             .parse(this.parse(await this.body(request)))
           this.store.db.transaction(() => {
             this.store.db
-              .query('UPDATE organizations SET active=?,sharing=? WHERE id=?')
+              .query(
+                'UPDATE organizations SET active=COALESCE(?,active),sharing=COALESCE(?,sharing) WHERE id=?'
+              )
               .run(
-                input.active === undefined ? member.active : Number(input.active),
-                input.sharing === undefined ? member.sharing : Number(input.sharing),
+                input.active === undefined ? null : Number(input.active),
+                input.sharing === undefined ? null : Number(input.sharing),
                 member.id
               )
             if (input.active === false)
@@ -805,7 +747,7 @@ export class PilotApi {
                 )
                 .run(member.id)
             this.store.audit(actor(session), 'member_policy_changed', member.id, input, this.now())
-            this.refresh()
+            this.incidents.refresh(this.now())
           })()
           return reply({ updated: true })
         }
@@ -867,18 +809,16 @@ export class PilotApi {
             input,
             this.now()
           )
-          this.refresh()
+          this.incidents.refresh(this.now())
         })()
         return reply({ updated: true })
       }
       if (path === '/api/pilot/policy' && request.method === 'GET')
-        return reply({ correlation: policy, disclosure: this.disclosure() })
+        return reply({ correlation: policy, disclosure: this.incidents.disclosure() })
       if (path === '/api/pilot/policy' && request.method === 'PUT') {
         const disclosure = disclosurePolicySchema.parse(this.parse(await this.body(request)))
         if (
           new Set(disclosure.suppliers.map((s) => s.id)).size !== disclosure.suppliers.length ||
-          new Set(disclosure.suppliers.map((s) => s.displayName)).size !==
-            disclosure.suppliers.length ||
           disclosure.recipients.some((r) => !this.store.member(r))
         )
           fail(400, 'POLICY_REJECTED', 'Disclosure policy references are invalid or ambiguous')
@@ -910,14 +850,31 @@ export class PilotApi {
             ? new ApiError(400, 'INVALID_INPUT', 'Request fields do not match the required schema')
             : new ApiError(500, 'INTERNAL_ERROR', 'The workspace could not complete this request')
       // Never log bodies, cookies, signatures, access tokens, or raw error text.
-      if (new URL(request.url).pathname === '/api/pilot/observations') {
-        this.store.audit(
-          'ingestion',
-          'observation_rejected',
-          '',
-          { reason: known.code },
-          this.now()
-        )
+      if (
+        new URL(request.url).pathname === '/api/pilot/observations' &&
+        known.status !== 429 &&
+        this.limiter.take('rejection-audit:' + clientIp, 30, this.now())
+      ) {
+        try {
+          this.store.audit(
+            'ingestion',
+            'observation_rejected',
+            '',
+            { reason: known.code },
+            this.now()
+          )
+        } catch {
+          return reply(
+            {
+              error: {
+                code: 'INTERNAL_ERROR',
+                message: 'The workspace could not complete this request',
+              },
+              requestId,
+            },
+            500
+          )
+        }
       }
       return reply({ error: { code: known.code, message: known.message }, requestId }, known.status)
     }

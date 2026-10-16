@@ -70,7 +70,9 @@ flowchart LR
     W --> M[Minimal aggregate summary]
 ```
 
-The local pilot and CRE workflow share the deterministic core but are **separate execution paths** today. The CRE workflow reads fictional loopback fixtures, not the pilot database, and does not deliver participant briefs. The public website is a third path: an offline-capable export containing only approved fictional outputs.
+The processing pipeline is **scoped observations → authentication/validation → correlation → consent and disclosure checks → an approved brief**. One shared policy engine supports three execution modes: the public static demo, the persistent local pilot and the experimental CRE adapter. They do not require separate backend services.
+
+The CRE workflow currently reads fictional loopback fixtures, not the pilot database, and does not deliver participant briefs. The public website embeds only approved fictional outputs. `correlation/defaults.ts` owns shared policy defaults; `app/incidents.ts` owns incident matching/delivery projection; `demo/` owns fictional scenarios and website export.
 
 See [the architecture walkthrough](docs/architecture.md), [design decisions and tradeoffs](docs/design-decisions.md), and [API contract](docs/api.md).
 
@@ -115,7 +117,7 @@ bun run check:web
 bun run check:pilot
 ```
 
-Recorded local validation: **73 tests, 299 assertions**, passing type/format checks and a successful WASM build. Browser suites cover all five scenarios, JSON export, keyboard interactions, five viewport widths, signed pilot flows, participant isolation, consent, revocation, audit and sign-out. Tests use generated disposable credentials; development access files are never read by browser checks.
+Recorded local validation: **86 tests, 354 assertions**, passing type checks for application and test code, format checks and a successful WASM build. Regression cases cover concurrent revocation, stable incident identity under display-label collisions, duplicate collector enrollment, independent evidence expiry, bounded rejection auditing and static export without rewriting JavaScript. Browser suites cover all five scenarios, JSON export, keyboard interactions, five viewport widths, signed pilot flows, participant isolation, consent, revocation, audit and sign-out, including failed sign-out and stale session responses. Tests use generated disposable credentials; development access files are never read by browser checks.
 
 Browser suites require Python Playwright and Chromium. See [CONTRIBUTING.md](CONTRIBUTING.md) for an isolated setup and the CI badge above for current remote results. Native CRE simulation is a separate, currently unvalidated check requiring supported authentication; [the validation record](docs/validation.md) distinguishes every level.
 

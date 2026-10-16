@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "test": "bun test tests",
-    "typecheck": "bun run --cwd correlation typecheck && bun run typecheck:app",
+    "typecheck": "bun run --cwd correlation typecheck && bun run typecheck:app && bun run typecheck:workflow-tests",
     "typecheck:app": "tsc -p tsconfig.app.json",
     "build": "bun run --cwd correlation build",
     "build:web": "bun run scripts/export-demo.ts dist/index.html",
@@ -20,7 +20,8 @@
     "simulate": "cre workflow simulate correlation --target local-simulation --non-interactive --trigger-index 0",
     "check:pilot": "bun run scripts/check-pilot.ts",
     "collector": "bun run scripts/collector.ts",
-    "format:check": "prettier --check app web/app scripts/server.ts scripts/collector.ts scripts/check-pilot.ts tests/pilot.test.ts tsconfig.app.json .prettierrc.json"
+    "format:check": "prettier --check app correlation demo scripts tests web tsconfig.app.json .prettierrc.json tsconfig.workflow-tests.json",
+    "typecheck:workflow-tests": "tsc -p tsconfig.workflow-tests.json"
   },
   "devDependencies": {
     "@chainlink/cre-sdk-javy-plugin": "1.7.0",

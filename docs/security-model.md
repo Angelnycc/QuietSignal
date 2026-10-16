@@ -15,7 +15,11 @@ The supported environment is one trusted developer operating synthetic test part
 | Audit | Local SHA-256 hash chain, startup verification, operator trail, scoped participant trail | Not externally anchored or immutable; database owner can rewrite/truncate the complete chain |
 | Resource use | Bounded bodies, per-run evidence limits, roster/collector limits and process-local rate windows | Not a production abuse-control service; total retained history and disk use remain unbounded |
 
-Failed admission records only a generic reason code. Request bodies, signatures, cookies, access tokens and raw exception messages are not logged. The outer server disables development error pages and returns a generic error. Mutation records and the associated audit append use transactions where evidence or policy state changes.
+Failed admission records only a generic reason code. Rejection audit writes are capped at thirty per address per minute; rate-limited requests do not append audit entries. This is bounded sampling, not a complete record of every rejected request. Accepted evidence and policy mutations retain transactional audit records. Request bodies, signatures, cookies, access tokens and raw exception messages are not logged. Audit failures return generic errors, including on rejected requests.
+
+Member patches update only the explicitly supplied fields, so a slow partial update cannot undo a concurrent revocation. Controlled scenario revocations invalidate participant sessions just like administrative revocation. Collector identities cannot appear more than once in an enrollment snapshot. An empty recipient allowlist deliberately suspends all delivery. Incident identity uses stable internal findings, never supplier display labels; those identifiers and exact counts remain outside the public brief projection.
+
+The interface does not claim successful sign-out after a failed request, and older session responses cannot reopen the workspace after logout. These behaviors have browser regressions. The outer server disables development error pages and returns generic failures.
 
 The local server has an operator-only controlled simulator and public fictional showcase endpoints. Showcase responses cannot read the persistent pilot database. The signed ingestion route does not accept browser sessions as a substitute for collector keys. Collector validity and request age are checked again after streaming body reads; browser sessions are also rechecked after body reads to close revocation races.
 

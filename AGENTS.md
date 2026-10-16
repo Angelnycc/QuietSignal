@@ -6,7 +6,7 @@ The user wants local development and review before requesting deployment access.
 
 Read README.md and docs/validation.md before making readiness claims. Synthetic demos, native CRE simulation, and deployed confidential execution are separate validation levels. Do not claim TEE security, ZK proofs, ACE policies, or CCIP delivery from local unit tests.
 
-Run `bun test` and `bun run typecheck` for correlation changes. Start `bun run dev` for the loopback synthetic service; then run the README's exact non-broadcast native CRE simulation when authentication is available. Follow the installed Chainlink CRE skill for CRE changes.
+Run `bun test` and `bun run typecheck` for correlation changes. Start `bun run dev` for the loopback synthetic service; then run the non-broadcast native CRE simulation in docs/architecture.md when authentication is available. Follow the installed Chainlink CRE skill for CRE changes.
 
 For website changes, run `bun run build:web` and `bun run check:web` (Python Playwright and Chromium required). The static website is dist/index.html; screenshots are in dist/website-checks. Keep all demo functionality self-contained and clearly fictional. A static build is not a public deployment; do not claim a live preview URL exists. Publish only to the user-provided Angelnycc/QuietSignal repository.
 
@@ -14,4 +14,4 @@ The product goal is selective evidence sharing with trusted recipients. Follow d
 
 For pilot changes, run `bun test`, `bun run typecheck`, `bun run format:check` and `bun run check:pilot`. Browser checks create disposable state and must never read development operator or collector credentials. Keep `.quietsignal` and all private collector/access files out of Git and source archives. Preserve the loopback-only boundary; do not imply that a cloud-local URL is accessible from the user’s laptop.
 
-The user explicitly forbids changes or deployments under Angelnycc/sports-settlement-oracle. Do not use that repository for QuietSignal. The mistakenly created website-only quietsignal-preview branch was removed; Pages was never enabled and main was unchanged. The user created https://github.com/Angelnycc/QuietSignal.git and explicitly provided it as the separate destination. Git/API access was verified; use only that repository for QuietSignal source publication and website hosting. A public website URL remains the goal; do not present local file links as a usable website.
+The user explicitly forbids changes or deployments under Angelnycc/sports-settlement-oracle. Do not use that repository for QuietSignal. The user created https://github.com/Angelnycc/QuietSignal.git and explicitly provided it as the separate destination. Git/API access was verified; use only that repository for QuietSignal source publication and website hosting. The static website is deployed at https://angelnycc.github.io/QuietSignal/. Verify subsequent Pages builds after publishing; do not present local file links as a usable public website.

@@ -1,8 +1,8 @@
 local-simulation:
   user-workflow:
     workflow-name: quietsignal-correlation-local
-    deployment-registry: "private"
+    deployment-registry: 'private'
   workflow-artifacts:
-    workflow-path: "./main.ts"
-    config-path: "./config.local-simulation.json"
-    secrets-path: ""
+    workflow-path: './main.ts'
+    config-path: './config.local-simulation.json'
+    secrets-path: ''

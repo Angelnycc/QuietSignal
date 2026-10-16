@@ -19,9 +19,13 @@ const load = (path: string, maximum: number) => {
   if (statSync(path).size > maximum) throw new Error('Input file exceeds the permitted size')
   return JSON.parse(readFileSync(path, 'utf8')) as unknown
 }
+const usage =
+  'Usage: collector generate <collector-id> <org-id> <private-file> | submit <loopback-origin> <workspace-id> <run-id> <private-file> <synthetic-observation-file>'
 try {
   const [command, ...args] = process.argv.slice(2)
-  if (command === 'generate' && args.length === 3) {
+  if (!command || ['help', '--help', '-h'].includes(command)) {
+    console.log(usage)
+  } else if (command === 'generate' && args.length === 3) {
     const [collectorId, organizationId, path] = args as [string, string, string]
     id.parse(collectorId)
     id.parse(organizationId)
@@ -104,10 +108,10 @@ try {
       })
     )
     if (!response.ok) process.exitCode = 1
-  } else
-    throw new Error(
-      'Usage: collector generate <collector-id> <org-id> <private-file> | submit <loopback-origin> <workspace-id> <run-id> <private-file> <synthetic-observation-file>'
-    )
+  } else {
+    console.error(usage)
+    process.exitCode = 1
+  }
 } catch {
   // Parser/crypto exceptions can include supplied fields; do not echo them.
   console.error(

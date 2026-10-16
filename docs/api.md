@@ -21,7 +21,7 @@ All paths below start with `/api/pilot`. Responses are JSON with `Cache-Control:
 | POST `/members/:id/revoke-access` | Operator + CSRF | Revoke all participant keys/sessions for that member |
 | GET, POST `/collectors` | Operator (+ CSRF on POST) | List fingerprints or register `{id,organizationId,publicKey}` |
 | PATCH `/collectors/:id` | Operator + CSRF | Strict `{active: boolean}` |
-| GET, PUT `/policy` | Operator (+ CSRF on PUT) | Inspect rules or replace strict disclosure policy |
+| GET, PUT `/policy` | Operator (+ CSRF on PUT) | Inspect rules or replace strict disclosure policy; an empty recipient list suspends delivery |
 | POST `/simulate` | Operator + CSRF | `{scenario,resetTestMembership}`; five predefined synthetic scenarios; concurrent runs rejected |
 
 Cookie-authenticated mutations require both an exact `Origin` and `X-QS-CSRF` from `/session`. Access files never go into URLs. Private collector keys never go to the registration endpoint.

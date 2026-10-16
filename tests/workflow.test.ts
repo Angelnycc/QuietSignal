@@ -1,24 +1,36 @@
+import { policy } from '../correlation/defaults'
 import { describe, expect, test } from 'bun:test'
 import { configSchema, initWorkflow, onCronTrigger } from '../correlation/workflow'
-import { fixture, policy } from '../scripts/fixtures'
+import { fixture } from '../demo/fixtures'
 
 const now = 1_800_000_000_000
-const config = () => configSchema.parse({ mode: 'local-simulation', schedule: '0 */5 * * * *',
-  snapshotUrl: 'http://127.0.0.1:8787/fixtures/snapshot', policy })
+const config = () =>
+  configSchema.parse({
+    mode: 'local-simulation',
+    schedule: '0 */5 * * * *',
+    snapshotUrl: 'http://127.0.0.1:8787/fixtures/snapshot',
+    policy,
+  })
 
 function mockRuntime(body = JSON.stringify(fixture('correlated', now)), statusCode = 200) {
   const released: string[] = []
   let crossovers = 0
   const runtime = {
-    config: config(), now: () => new Date(now),
-    callCapability: () => ({ result: () => ({ statusCode, body: new TextEncoder().encode(body) }) }),
+    config: config(),
+    now: () => new Date(now),
+    callCapability: () => ({
+      result: () => ({ statusCode, body: new TextEncoder().encode(body) }),
+    }),
     usingTheDons: () => {
       crossovers++
       return { log: (value: string) => released.push(value) }
     },
   }
-  return { runtime: runtime as unknown as Parameters<typeof onCronTrigger>[0], released,
-    crossovers: () => crossovers }
+  return {
+    runtime: runtime as unknown as Parameters<typeof onCronTrigger>[0],
+    released,
+    crossovers: () => crossovers,
+  }
 }
 
 describe('confidential handler contract (mock runtime, not a TEE)', () => {
@@ -61,7 +73,9 @@ describe('confidential handler contract (mock runtime, not a TEE)', () => {
   })
   test('rejects production mode, arbitrary sources, and five-field schedules', () => {
     expect(() => configSchema.parse({ ...config(), mode: 'production' })).toThrow()
-    expect(() => configSchema.parse({ ...config(), snapshotUrl: 'https://other.example/data' })).toThrow()
+    expect(() =>
+      configSchema.parse({ ...config(), snapshotUrl: 'https://other.example/data' })
+    ).toThrow()
     expect(() => configSchema.parse({ ...config(), schedule: '*/5 * * * *' })).toThrow()
   })
 })

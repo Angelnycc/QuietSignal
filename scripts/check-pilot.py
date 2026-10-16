@@ -111,8 +111,29 @@ with sync_playwright() as p:
     member.get_by_role('button', name='Audit trail', exact=False).click()
     expect(member.locator('.audit-integrity')).to_contain_text('Hash chain intact')
     assert 'demo-bravo' not in member.locator('#page-content').inner_text()
+    # Failed sign-out must not claim that the server session was revoked.
+    member.route('**/api/pilot/logout', lambda route: route.fulfill(status=500,
+        content_type='application/json', body=json.dumps({'error': {'message': 'Test failure'}})))
+    member.get_by_role('button', name='Sign out', exact=True).click()
+    expect(member.locator('#toast')).to_have_text('Could not complete sign out. Retry while connected.')
+    expect(member.locator('#workspace-view')).to_be_visible()
+    member.unroute('**/api/pilot/logout')
+
+    # Hold a valid, older session response until after logout has completed.
+    stale_session = member.request.get(origin + '/api/pilot/session').json()
+    held = []
+    member.route('**/api/pilot/session', lambda route: held.append(route))
+    with member.expect_request('**/api/pilot/session'):
+        member.evaluate('() => { window.pendingSessionRefresh = loadSession(); }')
+    member.wait_for_timeout(100)
+    assert len(held) == 1
     member.get_by_role('button', name='Sign out', exact=True).click()
     expect(member.locator('#login-form')).to_be_visible()
+    held[0].fulfill(status=200, content_type='application/json', body=json.dumps(stale_session))
+    member.evaluate('() => window.pendingSessionRefresh')
+    expect(member.locator('#workspace-view')).not_to_be_visible()
+    expect(member.locator('#login-form')).to_be_visible()
+    member.unroute('**/api/pilot/session')
     assert member.request.get(origin + '/api/pilot/incidents').status == 401
 
     for width in [360, 390, 768, 1024, 1440]:

@@ -7,8 +7,8 @@ import { Database } from 'bun:sqlite'
 import { PilotApi, type PilotOptions, type SeedCollector } from '../app/api'
 import { PilotStore } from '../app/store'
 import { digest, randomToken, signObservation } from '../app/security'
-import { fixture, scenarios } from '../scripts/fixtures'
-import { disclosurePolicy } from '../scripts/disclosure'
+import { fixture, scenarios } from '../demo/fixtures'
+import { disclosurePolicy } from '../correlation/defaults'
 import { createLocalServer } from '../app/http'
 
 const origin = 'http://127.0.0.1:9876'
@@ -140,6 +140,82 @@ function setup(extra: Partial<PilotOptions> = {}, path = ':memory:') {
 }
 
 describe('controlled pilot authentication and admission', () => {
+  test('a paused partial member update cannot undo a newer revocation', async () => {
+    const f = setup()
+    const owner = await f.login()
+    let send!: () => void
+    let reading!: () => void
+    const started = new Promise<void>((resolve) => {
+      reading = resolve
+    })
+    const stream = new ReadableStream({
+      start(controller) {
+        send = () => {
+          controller.enqueue(new TextEncoder().encode(JSON.stringify({ sharing: false })))
+          controller.close()
+        }
+      },
+      pull() {
+        reading()
+      },
+    })
+    const pending = f.api.fetch(
+      new Request(origin + '/api/pilot/members/demo-charlie', {
+        method: 'PATCH',
+        headers: {
+          Origin: origin,
+          Cookie: owner.cookie,
+          'X-QS-CSRF': owner.csrf,
+          'Content-Type': 'application/json',
+        },
+        body: stream,
+      })
+    )
+    await started
+    expect(
+      (await f.request('/members/demo-charlie', 'PATCH', { active: false }, owner)).status
+    ).toBe(200)
+    send()
+    expect((await pending).status).toBe(200)
+    expect(f.store.member('demo-charlie')!.active).toBe(0)
+    expect(f.store.member('demo-charlie')!.sharing).toBe(0)
+  })
+  test('audit failure during a rejected request returns a generic response', async () => {
+    const f = setup()
+    f.store.audit = () => {
+      throw new Error('private storage error')
+    }
+    const response = await f.submit(
+      f.signed(f.envelope(f.emptyRun()), f.seeds[0], { workspaceId: randomUUID() })
+    )
+    expect(response.status).toBe(500)
+    expect(await response.text()).not.toContain('private storage error')
+  })
+  test('rejected-request audit writes are bounded and rate-limit errors do not amplify storage', async () => {
+    const f = setup({ collectorRateLimit: 1 })
+    const value = f.envelope(f.emptyRun())
+    for (let i = 0; i < 40; i++)
+      await f.submit(f.signed(value, f.seeds[0], { workspaceId: randomUUID() }))
+    const count = () =>
+      (
+        f.store.db
+          .query("SELECT COUNT(*) AS n FROM audit WHERE action='observation_rejected'")
+          .get() as { n: number }
+      ).n
+    expect(count()).toBe(30)
+    await f.submit(f.signed(value))
+    expect((await f.submit(f.signed(value))).status).toBe(429)
+    expect(count()).toBe(30)
+  })
+  test('rejects invalid destination syntax before persisting it', async () => {
+    const f = setup()
+    const value = f.envelope(f.emptyRun())
+    value.observation.destination = 'https://not-a-domain.example/path'
+    expect((await f.submit(f.signed(value))).status).toBe(422)
+    expect(
+      (f.store.db.query('SELECT COUNT(*) AS n FROM observations').get() as { n: number }).n
+    ).toBe(0)
+  })
   test('rolls back evidence and nonce admission if the audit append fails', async () => {
     const f = setup()
     const signed = f.signed(f.envelope(f.emptyRun()))
@@ -321,6 +397,54 @@ describe('controlled pilot authentication and admission', () => {
 })
 
 describe('recipient policy, durable incidents, and disclosure', () => {
+  test('empty recipient policy suspends delivery and can be restored', async () => {
+    const f = setup()
+    const owner = await f.login()
+    await f.run(owner)
+    const id = (await f.incidents(owner))[0]!.id
+    expect(
+      (await f.request('/policy', 'PUT', { ...disclosurePolicy, recipients: [] }, owner)).status
+    ).toBe(200)
+    expect(await f.incidents(owner)).toEqual([])
+    expect(
+      (await f.request('/incidents/' + id + '/download', 'GET', undefined, owner)).status
+    ).toBe(404)
+    await f.request('/policy', 'PUT', disclosurePolicy, owner)
+    expect((await f.incidents(owner))[0]!.id).toBe(id)
+  })
+  test('shared supplier display labels do not change internal incident identity', async () => {
+    const f = setup()
+    const owner = await f.login()
+    await f.run(owner)
+    const id = (await f.incidents(owner))[0]!.id
+    expect(
+      (
+        await f.request(
+          '/policy',
+          'PUT',
+          {
+            ...disclosurePolicy,
+            suppliers: [
+              ...disclosurePolicy.suppliers,
+              { ...disclosurePolicy.suppliers[0]!, id: 'another-supplier' },
+            ],
+          },
+          owner
+        )
+      ).status
+    ).toBe(200)
+    expect((await f.incidents(owner))[0]!.id).toBe(id)
+    expect(JSON.stringify(await f.incidents(owner))).not.toContain('another-supplier')
+  })
+  test('controlled revocation cannot resurrect a prior participant session after reset', async () => {
+    const f = setup()
+    const owner = await f.login()
+    const charlie = await f.participant(owner, 'demo-charlie')
+    await f.run(owner, 'revoked-member')
+    await f.run(owner, 'correlated')
+    expect((await f.request('/incidents', 'GET', undefined, charlie.session)).status).toBe(401)
+    expect((await f.incidents(await f.login(charlie.token))).length).toBe(1)
+  })
   test('independent collector CLI registers a public key and submits signed evidence over actual HTTP', async () => {
     const folder = mkdtempSync(join(tmpdir(), 'quietsignal-cli-'))
     cleanups.push(() => rmSync(folder, { recursive: true, force: true }))
@@ -387,7 +511,7 @@ describe('recipient policy, durable incidents, and disclosure', () => {
     })
     expect(f.store.auditIntegrity().valid).toBe(true)
   })
-  test.each(scenarios)(
+  test.each([...scenarios])(
     'signed controlled scenario %s follows threshold rules',
     async (scenario) => {
       const f = setup()

@@ -9,6 +9,6 @@
     "skipLibCheck": true,
     "lib": ["ESNext", "DOM"]
   },
-  "include": ["app/**/*.ts", "scripts/*.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["app/**/*.ts", "scripts/*.ts", "demo/**/*.ts", "tests/**/*.ts"],
+  "exclude": ["node_modules", "dist", "tests/workflow.test.ts"]
 }

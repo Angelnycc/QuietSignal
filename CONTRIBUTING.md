@@ -25,7 +25,7 @@ bun run check:pilot
 
 On Linux, browser system dependencies may require `python -m playwright install --with-deps chromium`. If a system Chromium is installed, the checks use it; `CHROMIUM_EXECUTABLE` selects an explicit path. Pilot browser tests use temporary credentials and databases, never development access files.
 
-Changes to authentication, admission, membership, timing or disclosure should include meaningful adversarial tests. Preserve reauthorization on incident list/detail/acknowledgement/download, strict schemas and the distinction between key possession and truthful telemetry. Do not weaken checks, include raw error details, or copy real logs into fixtures to make a test pass.
+Changes to authentication, admission, membership, timing or disclosure should include meaningful adversarial tests. Type checking covers application and test code; workflow tests use a separate configuration to preserve the CRE SDK runtime restrictions. Preserve reauthorization on incident list/detail/acknowledgement/download, strict schemas and the distinction between key possession and truthful telemetry. Do not weaken checks, include raw error details, or copy real logs into fixtures to make a test pass.
 
 For website changes, run both `bun run build:web` and `bun run check:web`. Keep the standalone export self-contained and the fictional-data notice visible. Refresh curated screenshots only from synthetic test runs. Changes to the local workspace also require `bun run check:pilot`.
 
