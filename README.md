@@ -30,6 +30,24 @@ bun run dev
 
 The last command starts a loopback-only dashboard and fixture service on port 8787. The five scenarios demonstrate a corroborated pattern, repeated reports from one member, harmless destination overlap, expired evidence, and revoked membership. Nothing is blocked or broadcast.
 
+## Website
+
+The security-themed website combines the project overview, an animated consortium diagram, a three-step product walkthrough, the scenario dashboard, a selective-disclosure walkthrough, architecture/status information, and an FAQ. The dashboard supports scenario reset and download of the approved fictional evidence brief as JSON. Disclosure tabs and the mobile navigation support keyboard interaction.
+
+```sh
+bun run build:web
+```
+
+This generates a self-contained static website at `dist/index.html`. It uses no external fonts, analytics, images, or runtime network calls. Its five fictional scenario outputs are generated from the same tested correlation and disclosure functions. The site is prepared for static hosting but has not been published, and no public preview URL is configured.
+
+For repeatable browser verification, with Python Playwright and Chromium installed:
+
+```sh
+bun run check:web
+```
+
+The check exercises all scenarios, the evidence JSON download, disclosure tabs, FAQ, internal links, mobile navigation, and five screen widths. Screenshots are written to `dist/website-checks`. The cloud browser blocks file URLs, so the check loads the exported document's exact contents without altering browser policy. It verifies that no external network request occurs.
+
 For a standalone review demo, run `bun run export:demo` and open `dist/quietsignal-demo.html` in a browser. All five scenarios work offline with fixed fictional outputs produced by the same correlation and disclosure functions. No credentials, installation on the reviewer's computer, or deployment is needed. The demo contains no raw roster or event records.
 
 CRE authentication and deployment access are not prerequisites for this local prototype. We are deferring deployment requests while the first version is being designed and reviewed.

@@ -9,6 +9,8 @@
     "test": "bun test tests",
     "typecheck": "bun run --cwd correlation typecheck",
     "build": "bun run --cwd correlation build",
+    "build:web": "bun run scripts/export-demo.ts dist/index.html",
+    "check:web": "python3 scripts/check-website.py",
     "demo": "bun run scripts/demo.ts",
     "export:demo": "bun run scripts/export-demo.ts",
     "dev": "bun run scripts/server.ts",

@@ -11,3 +11,5 @@ CRE coordinates confidential computation. The prototype uses a Confidential Work
 Development happens through Codex in the cloud workspace; no local Codex or Claude Code installation is required. The code checkout is `/workspace/quietsignal`. A ChatGPT Project can organize conversations and this brief; it is separate from the filesystem and GitHub repository. Moving a chat does not establish transfer of the attached execution environment.
 
 Read README.md and docs/validation.md for commands, current evidence, and blockers. Keep real logs and credentials out of chats, Git, public summaries, and demo fixtures.
+
+The website showcases the project with a dark security theme, a consortium diagram, an interactive five-scenario dashboard, an evidence-sharing walkthrough, and architecture/status information. `bun run build:web` creates a portable static site with no account or API key needed to explore. It is not publicly hosted yet.
