@@ -12,6 +12,9 @@ button{border:1px solid #3b4c66;background:#172238;color:#eef5ff;padding:12px 16
 button[aria-pressed="true"]{border-color:#71dfc3;color:#71dfc3}button:focus-visible{outline:3px solid #f5bf65;outline-offset:3px}
 article{border:1px solid #304159;border-radius:18px;padding:28px;background:#121d30}#status{color:#71dfc3;font-size:26px;margin-top:0}
 code{overflow-wrap:anywhere;color:#c2d1e8}footer{margin-top:24px;color:#8193ac;font-size:14px;line-height:1.7}
+.brief{margin:24px 0;padding:20px;border-radius:12px;background:#0b1525;border:1px solid #37516b}
+.brief h3{margin-top:0}dl{display:grid;grid-template-columns:140px 1fr;gap:12px;line-height:1.6}
+dt{color:#8193ac}dd{margin:0;overflow-wrap:anywhere}@media(max-width:550px){dl{grid-template-columns:1fr;gap:5px}dd{margin-bottom:12px}}
 </style>
 <div class="eyebrow">QuietSignal / first prototype</div>
 <h1>Share the evidence.<br>Protect the details.</h1>
@@ -25,7 +28,8 @@ code{overflow-wrap:anywhere;color:#c2d1e8}footer{margin-top:24px;color:#8193ac;f
 <button data-scenario="revoked-member" aria-pressed="false">Revoked member</button>
 </div>
 <article aria-live="polite" aria-atomic="true"><h2 id="status">Evaluating…</h2><p id="explanation"></p>
-<p>Released summary: <code id="summary"></code></p></article>
+<div id="evidence"></div>
+<details><summary>Aggregate status</summary><p><code id="summary"></code></p></details></article>
 <footer>The rule requires three enrolled organizations and two qualifying post-update process sequences within 30 minutes. A warning calls for investigation; it does not establish maliciousness or block anything.</footer>
 <script>
 const descriptions={
@@ -35,14 +39,31 @@ correlated:'Three fictional organizations independently reported the same suppli
 expired:'These observations are outside the evidence window and no longer support a warning.',
 'revoked-member':'A revoked organization does not contribute. The remaining organizations do not meet the threshold.'};
 let requestVersion=0;
+function showEvidence(briefs){
+const container=document.getElementById('evidence');container.replaceChildren();
+if(!briefs.length){const p=document.createElement('p');p.textContent='No evidence brief is available under the demo sharing policy.';container.append(p);return;}
+for(const brief of briefs){
+const section=document.createElement('section');section.className='brief';
+const heading=document.createElement('h3');heading.textContent='Evidence shared with the demo participant';section.append(heading);
+const fields=[['Destination',brief.indicator.value],['Software',brief.supplier.name+' '+brief.supplier.version],
+['Activity','Software update → new outbound destination → unusual child process'],
+['Corroboration','At least '+brief.corroboration.organizationsAtLeast+' enrolled organizations; at least '+brief.corroboration.sequenceOrganizationsAtLeast+' supporting sequences'],
+['Search window',new Date(brief.correlationWindow.startMs).toLocaleString()+' – '+new Date(brief.correlationWindow.endMs).toLocaleString()],
+['Evidence source','Synthetic observations; source authenticity has not been verified'],
+['Assessment','Investigation lead. Maliciousness has not been established.'],
+['Expires',new Date(brief.expiresAtMs).toLocaleString()]];
+const dl=document.createElement('dl');for(const [label,value]of fields){const dt=document.createElement('dt');dt.textContent=label;const dd=document.createElement('dd');dd.textContent=value;dl.append(dt,dd);}section.append(dl);
+const note=document.createElement('p');note.textContent='Contributor identities, full logs, exact event times, and unrelated activity are omitted.';section.append(note);container.append(section);}}
 async function select(scenario){
 const version=++requestVersion;
 document.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.scenario===scenario)));
 document.getElementById('status').textContent='Evaluating…';document.getElementById('explanation').textContent='';document.getElementById('summary').textContent='';
-try{const r=await fetch('/api/demo?scenario='+encodeURIComponent(scenario));if(!r.ok)throw new Error();
-const {scenario:ignored,...summary}=await r.json();if(version!==requestVersion)return;
+document.getElementById('evidence').replaceChildren();
+try{const r=await fetch('/api/member-demo?scenario='+encodeURIComponent(scenario));if(!r.ok)throw new Error();
+const {scenario:ignored,evidenceBriefs,deliveryMode,...summary}=await r.json();if(version!==requestVersion)return;
 document.getElementById('status').textContent=summary.status==='corroborated-pattern'?'Corroborated unusual activity':'No corroborated warning';
 document.getElementById('explanation').textContent=descriptions[scenario];document.getElementById('summary').textContent=JSON.stringify(summary);
+showEvidence(evidenceBriefs);
 }catch{if(version===requestVersion)document.getElementById('status').textContent='Unable to evaluate scenario';}}
 document.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>select(b.dataset.scenario)));select('correlated');
 </script>

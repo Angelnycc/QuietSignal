@@ -9,7 +9,7 @@ export type Scenario = typeof scenarios[number]
 
 export function fixture(scenario: Scenario, nowMs: number): Snapshot {
   const members = ['alpha', 'bravo', 'charlie'].map(id => ({
-    organizationId: `demo-${id}`, active: true, validFromMs: nowMs - 86_400_000,
+    organizationId: `demo-${id}`, active: true, shareEvidenceWithConsortium: true, validFromMs: nowMs - 86_400_000,
     expiresAtMs: nowMs + 86_400_000, collectorIds: [`collector-${id}`],
   }))
   const observations: Observation[] = members.map((m, i) => ({
