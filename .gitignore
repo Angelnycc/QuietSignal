@@ -1,0 +1,12 @@
+node_modules/
+.env
+.env.*
+*.env
+*.env.*
+dist/
+*.wasm
+*.wasm.br.b64
+.cre_build_tmp.js
+.DS_Store
+.agents/
+skills-lock.json

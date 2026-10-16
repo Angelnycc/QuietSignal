@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QuietSignal · Collective early warning</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#0b1120;color:#e5edf7}
+body{max-width:900px;margin:auto;padding:56px 24px}.eyebrow{color:#71dfc3;letter-spacing:.14em;font-size:12px;text-transform:uppercase}
+h1{font-size:clamp(36px,7vw,64px);letter-spacing:-.05em;margin:14px 0}p{color:#a6b8d0;line-height:1.7;max-width:680px}
+.notice{border-left:3px solid #f5bf65;padding:10px 16px;background:#192232;margin:24px 0}
+.choices{display:flex;flex-wrap:wrap;gap:10px;margin:28px 0}
+button{border:1px solid #3b4c66;background:#172238;color:#eef5ff;padding:12px 16px;border-radius:10px;cursor:pointer}
+button[aria-pressed="true"]{border-color:#71dfc3;color:#71dfc3}button:focus-visible{outline:3px solid #f5bf65;outline-offset:3px}
+article{border:1px solid #304159;border-radius:18px;padding:28px;background:#121d30}#status{color:#71dfc3;font-size:26px;margin-top:0}
+code{overflow-wrap:anywhere;color:#c2d1e8}footer{margin-top:24px;color:#8193ac;font-size:14px;line-height:1.7}
+</style>
+<div class="eyebrow">QuietSignal / first prototype</div>
+<h1>See the pattern.<br>Keep the evidence private.</h1>
+<p>Explore how independent observations can reveal unusual activity involving a shared software supplier.</p>
+<p class="notice">Synthetic local demonstration. No live monitoring, deployed enclave, or zero-knowledge proof. Every company and event is fictional.</p>
+<div class="choices" role="group" aria-label="Choose demonstration scenario">
+<button data-scenario="correlated" aria-pressed="true">Shared suspicious sequence</button>
+<button data-scenario="duplicate-reports" aria-pressed="false">One company, 50 reports</button>
+<button data-scenario="benign-overlap" aria-pressed="false">Shared destination only</button>
+<button data-scenario="expired" aria-pressed="false">Expired evidence</button>
+<button data-scenario="revoked-member" aria-pressed="false">Revoked member</button>
+</div>
+<article aria-live="polite" aria-atomic="true"><h2 id="status">Evaluating…</h2><p id="explanation"></p>
+<p>Released summary: <code id="summary"></code></p></article>
+<footer>The rule requires three enrolled organizations and two qualifying post-update process sequences within 30 minutes. A warning calls for investigation; it does not establish maliciousness or block anything.</footer>
+<script>
+const descriptions={
+correlated:'Three fictional organizations independently reported the same supplier, version, and destination with qualifying activity sequences.',
+'duplicate-reports':'Fifty reports from one organization still count as one organization. The independent-member threshold is not met.',
+'benign-overlap':'Sharing a destination does not satisfy the suspicious-sequence requirement.',
+expired:'These observations are outside the evidence window and no longer support a warning.',
+'revoked-member':'A revoked organization does not contribute. The remaining organizations do not meet the threshold.'};
+let requestVersion=0;
+async function select(scenario){
+const version=++requestVersion;
+document.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.scenario===scenario)));
+document.getElementById('status').textContent='Evaluating…';document.getElementById('explanation').textContent='';document.getElementById('summary').textContent='';
+try{const r=await fetch('/api/demo?scenario='+encodeURIComponent(scenario));if(!r.ok)throw new Error();
+const {scenario:ignored,...summary}=await r.json();if(version!==requestVersion)return;
+document.getElementById('status').textContent=summary.status==='corroborated-pattern'?'Corroborated unusual activity':'No corroborated warning';
+document.getElementById('explanation').textContent=descriptions[scenario];document.getElementById('summary').textContent=JSON.stringify(summary);
+}catch{if(version===requestVersion)document.getElementById('status').textContent='Unable to evaluate scenario';}}
+document.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>select(b.dataset.scenario)));select('correlated');
+</script>
+</html>

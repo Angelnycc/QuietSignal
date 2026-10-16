@@ -1,0 +1,2 @@
+# Receiver-free development. No RPC or signing key required.
+local-simulation: {}

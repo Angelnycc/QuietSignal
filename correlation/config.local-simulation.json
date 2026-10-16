@@ -1,0 +1,14 @@
+{
+  "mode": "local-simulation",
+  "schedule": "0 */5 * * * *",
+  "snapshotUrl": "http://127.0.0.1:8787/fixtures/snapshot?scenario=correlated",
+  "policy": {
+    "version": "supplier-sequence-v1",
+    "minimumOrganizations": 3,
+    "minimumSequenceOrganizations": 2,
+    "windowMs": 1800000,
+    "maxSequenceSpanMs": 600000,
+    "maxSnapshotAgeMs": 60000,
+    "alertTtlMs": 300000
+  }
+}
