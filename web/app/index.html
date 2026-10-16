@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#0a0e11" />
+    <title>QuietSignal · Pilot workspace</title>
+    <link rel="stylesheet" href="/app/styles.css" />
+    <script src="/app/app.js" defer></script>
+  </head>
+  <body>
+    <div class="background-grid" aria-hidden="true"></div>
+    <section id="login-view" class="login-view">
+      <a class="brand" href="/">⌁ Quiet<span>Signal</span></a>
+      <div class="login-card">
+        <div class="eyebrow">CONTROLLED LOCAL PILOT</div>
+        <h1>Enter your<br />evidence workspace.</h1>
+        <p>
+          Use a local access file issued by this workspace. This is separate from your Chainlink
+          account and requires no CRE API key.
+        </p>
+        <form id="login-form">
+          <label class="file-label" for="access-file"
+            >Choose access file <span>JSON · private workspace credential</span></label
+          >
+          <input id="access-file" type="file" accept=".json,application/json" />
+          <label for="access-token">Or enter your local access token</label
+          ><input
+            id="access-token"
+            type="password"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="Local workspace token"
+          />
+          <button class="primary" type="submit">
+            Open workspace <span aria-hidden="true">→</span>
+          </button>
+        </form>
+        <p id="login-error" class="error" role="alert"></p>
+        <details>
+          <summary>Where is the operator access file?</summary>
+          <p>
+            When the server starts, it creates <code>.quietsignal/operator-access.json</code> on
+            that machine. Open that file through the file chooser. Keep it private and out of Git.
+            Participant access files are issued inside the operator workspace.
+          </p>
+        </details>
+      </div>
+      <p class="login-foot">
+        Synthetic test sources · local storage · no deployment or automated blocking
+      </p>
+    </section>
+    <div id="workspace-view" class="workspace" hidden>
+      <aside class="sidebar">
+        <a class="brand" href="/">⌁ Quiet<span>Signal</span></a>
+        <div class="sidebar-caption">THREAT EXCHANGE</div>
+        <nav aria-label="Workspace navigation">
+          <button data-view="incidents" class="nav-item active" type="button">
+            <span>01</span> Incidents
+          </button>
+          <button data-view="collectors" class="nav-item operator-only" type="button">
+            <span>02</span> Collectors
+          </button>
+          <button data-view="policies" class="nav-item" type="button">
+            <span>03</span> Sharing policy
+          </button>
+          <button data-view="audit" class="nav-item" type="button">
+            <span>04</span> Audit trail
+          </button>
+        </nav>
+        <div class="sidebar-bottom">
+          <div class="status-dot"></div>
+          LOCAL PILOT
+          <p>Signed synthetic evidence.<br />No production protection claims.</p>
+          <a href="/">← Project website</a>
+        </div>
+      </aside>
+      <main class="main-content">
+        <header class="workspace-header">
+          <div>
+            <div class="eyebrow" id="role-label">WORKSPACE</div>
+            <h1 id="page-title">Incident workspace</h1>
+          </div>
+          <div class="header-actions">
+            <span id="identity" class="pill"></span
+            ><button id="refresh" class="secondary" type="button">Refresh</button
+            ><button id="logout" class="secondary" type="button">Sign out</button>
+          </div>
+        </header>
+        <div class="notice">
+          <span class="status-dot"></span>
+          <p>
+            Controlled pilot. Signatures verify registered collectors, not the truth of events.
+            Native CRE execution and external secure delivery remain integration milestones.
+          </p>
+        </div>
+        <section id="run-controls" class="panel operator-only">
+          <div class="panel-title">
+            <div>
+              <h2>Controlled collector run</h2>
+              <p>
+                Starts an isolated run and submits genuinely signed fictional observations through
+                the ingestion endpoint.
+              </p>
+            </div>
+            <span class="pill">ED25519</span>
+          </div>
+          <form id="run-form" class="run-form">
+            <label for="scenario"
+              >Scenario<select id="scenario">
+                <option value="correlated">Shared suspicious sequence</option>
+                <option value="duplicate-reports">One organization, 50 reports</option>
+                <option value="benign-overlap">Shared destination only</option>
+                <option value="expired">Expired evidence</option>
+                <option value="revoked-member">Revoked member</option>
+              </select></label
+            >
+            <label class="check"
+              ><input id="reset-members" type="checkbox" checked /> Restore test memberships and
+              collector activation</label
+            ><button class="primary" type="submit">Start controlled run</button>
+          </form>
+          <p id="run-result" class="subtle" role="status">
+            No simulation is started automatically. Earlier runs and audit entries are retained.
+          </p>
+        </section>
+        <div id="page-content"></div>
+        <p class="workspace-foot">
+          Evidence permissions are re-evaluated on every request. No full logs or private collector
+          keys are delivered to participants.
+        </p>
+      </main>
+    </div>
+    <div id="toast" class="toast" role="status" hidden></div>
+  </body>
+</html>

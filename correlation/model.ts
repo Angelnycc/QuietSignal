@@ -27,7 +27,7 @@ export const snapshotSchema = z.object({
   // This roster represents a trusted enrollment authority in the mock source.
   members: z.array(z.object({
     organizationId: id, active: z.boolean(), shareEvidenceWithConsortium: z.boolean(), validFromMs: timestamp,
-    expiresAtMs: timestamp, collectorIds: z.array(id).min(1).max(20),
+    expiresAtMs: timestamp, collectorIds: z.array(id).max(20),
   }).strict()).max(100),
   observations: z.array(observationSchema).max(1000),
 }).strict()

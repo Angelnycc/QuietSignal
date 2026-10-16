@@ -2,18 +2,20 @@
 
 Share useful threat evidence with trusted participants while withholding unrelated sensitive information. QuietSignal is an early prototype for correlating suspicious software-supplier activity across organizations. Individually ambiguous events can become a useful investigation lead when independent organizations observe the same supplier, version, destination, and event sequence.
 
-The product goal is selective evidence sharing: recipients should receive enough evidence to investigate a threat without receiving contributors' full logs, employee information, internal network details, or unrelated activity. A synthetic member-brief generator now demonstrates this disclosure policy. Authenticated, encrypted delivery to real participants is still a future step. See [the evidence-sharing policy](docs/evidence-sharing.md).
+The product goal is selective evidence sharing: recipients should receive enough evidence to investigate a threat without receiving contributors' full logs, employee information, internal network details, or unrelated activity. A synthetic member-brief generator and an authenticated local pilot now demonstrate this disclosure policy. Remote encrypted delivery and real-source integration remain future steps. See [the evidence-sharing policy](docs/evidence-sharing.md).
 
 ## Current implementation
 
 - Strictly validated, deterministic correlation rules.
 - Three distinct enrolled organizations, including two reporting an update → connection → unusual child-process sequence, within a rolling 30-minute window.
 - Duplicate suppression, collector authorization, membership expiry/revocation, source freshness, and bounded alert validity.
-- A local synthetic fixture service and interactive demonstration dashboard.
+- A security-themed project website and a separate authenticated incident workspace.
+- Persistent SQLite runs/incidents, per-principal acknowledgement, approved evidence downloads, enrollment/collector controls, participant access files and a scoped audit trail.
+- Ed25519 signed synthetic collector admission, persistent nonce replay checks, strict event scope, bounded requests and controlled simulations that exercise the same ingestion endpoint.
 - Policy-approved evidence briefs with a relevant destination, approved software/version, sanitized sequence, coarse search window, threshold corroboration, expiry, and limitations. Contributor consent and eligible-recipient checks are modeled with a trusted mock roster.
 - A Chainlink CRE Confidential Workflow entry point that fetches the snapshot inside a TEE handler and releases only a minimal summary through `usingTheDons()`.
 
-**No real organization data, production TEE, ZK proof, ACE integration, CCIP delivery, chain deployment, or firewall enforcement is implemented.** The enrollment roster is a trusted mock authority. The fixture service is not authenticated and must remain loopback-only. The member-demo endpoint uses a fixed fictional recipient, not a logged-in user. The CRE workflow itself still exports only aggregate status; member briefs are generated in the local demo, not delivered through CRE. Synthetic timestamps and event labels do not establish that real incidents occurred.
+**This is a controlled local pilot using synthetic observations.** The local operator controls test enrollment and built-in collector keys. Registered-key signatures establish key possession, not event truth or independent organizations. The authenticated pilot is separate from the unauthenticated fictional showcase endpoints, and the server remains loopback-only. The CRE workflow still reads the fictional fixture snapshot and exports only aggregate status; it does not process the pilot database or deliver member briefs through CRE. No real monitoring, production TEE, ZK proof, ACE, CCIP, chain deployment, or firewall enforcement is implemented. Read the [security model](docs/security-model.md) for exact boundaries.
 
 ## Local development
 
@@ -28,7 +30,16 @@ bun run demo
 bun run dev
 ```
 
-The last command starts a loopback-only dashboard and fixture service on port 8787. The five scenarios demonstrate a corroborated pattern, repeated reports from one member, harmless destination overlap, expired evidence, and revoked membership. Nothing is blocked or broadcast.
+The last command starts the website, authenticated pilot and fictional fixture service on loopback port 8787. The website is `/`; the pilot workspace is `/app`. On the server machine, choose `.quietsignal/operator-access.json` in the login file picker; it is a generated application credential, not a Chainlink API key. Keep it private and out of chat/Git. Cloud localhost is not your laptop’s localhost, and this repository has no public preview configured.
+
+Start a controlled run, review/acknowledge a brief, issue a participant access file, and test how consent and collector revocation change delivery. See the [pilot guide](docs/local-pilot.md), [API contract](docs/api.md), and [security model](docs/security-model.md). Nothing is blocked or broadcast.
+
+```sh
+bun run format:check
+bun run check:pilot
+```
+
+The pilot browser check uses an isolated temporary database and generated test credentials, never your development access files. It checks real HTTP flows, all five scenarios, downloads, consent, revocation, participant permissions, audit and mobile layout.
 
 ## Website
 
@@ -74,18 +85,20 @@ Do not add `--broadcast`. The local handler has no report, receiver, EVM client,
 
 ## Privacy boundary
 
-The local fixture source exposes its synthetic roster and observations to the developer. In a deployed design, full source records and contributor identifiers stay within the authorized processing boundary. An explicit disclosure policy selects useful evidence for trusted recipients; useful indicators are not inherently secret. The CRE workflow returns only mode, policy version, evaluation time, expiry, and a status. It returns no raw domain hash, avoiding publication of a guessable domain commitment. The local `/api/member-demo` route demonstrates the approved brief separately; production member delivery is not implemented.
+The local fixture source exposes its synthetic roster and observations to the developer. In a deployed design, full source records and contributor identifiers stay within the authorized processing boundary. An explicit disclosure policy selects useful evidence for trusted recipients; useful indicators are not inherently secret. The CRE workflow returns only mode, policy version, evaluation time, expiry, and a status. It returns no raw domain hash, avoiding publication of a guessable domain commitment. The local `/api/member-demo` route remains a fixed-recipient fictional showcase. The `/api/pilot` routes authenticate participants and recheck current release permission for every list/detail/review/download request. The local database and host are trusted; remote encrypted delivery and confidential processing of pilot records remain unimplemented.
 
 This is a TEE design, not a claim of zero-knowledge security. Local simulation does not provide enclave confidentiality. Even a deployed TEE cannot establish that an upstream source told the truth. Threshold warnings indicate corroboration, not proof of maliciousness. Public status and timing can still leak aggregate information; production requires an explicit output policy.
 
 ## Next milestones
 
-1. Review and refine the local evidence-sharing demo without requiring an API key or deployment request.
-2. Replace the mock roster with independently managed membership and connect one authenticated evidence source.
-3. Connect the tested brief generator to authenticated, encrypted member delivery and prevent membership-probing queries. Move the release decision inside the confidential workflow without exporting plaintext briefs through ordinary DON logs or public reports.
-4. When ready, validate native CRE simulation using supported authentication, then separately validate deployed confidential execution with beta access and a documented threat model.
-5. Add ACE-backed access policies and, where needed, CCIP delivery with version/expiry/replay checks.
-6. Investigate a supported DECO integration for a specific source-authenticity statement; do not assume it supplies private correlation or anonymous membership automatically.
+1. Review the tested local pilot and its selective evidence release behavior.
+2. Add independently managed membership and one narrowly scoped authenticated source connector. Test the source-authenticity statement explicitly; collector signatures alone do not prove events occurred.
+3. Connect authorized pilot snapshots and recipient release decisions to confidential CRE execution. Keep member briefs out of ordinary DON logs and public reports.
+4. When ready, validate native CRE simulation using supported authentication, then separately validate deployed confidential execution with a documented threat model.
+5. Prepare remote TLS, identity/key management, retention/encryption, inference controls and an independent review before external use. Add ACE access policy and CCIP delivery only where their guarantees are needed.
+6. Confirm a supported DECO integration for a specific source-verification requirement; do not assume it supplies private correlation or anonymous membership automatically.
+
+A GitHub Actions workflow is prepared to run the locked install, tests, type/format checks, workflow build and browser suites without account credentials; remote execution is unverified. GitHub creation/upload and deployment remain deferred as requested. Local commits preserve this implementation; no public URL or remote repository publication is implied.
 
 ## Development guidance
 

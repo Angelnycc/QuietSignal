@@ -4,19 +4,31 @@
   "private": true,
   "type": "module",
   "packageManager": "bun@1.3.11",
-  "workspaces": ["correlation"],
+  "workspaces": [
+    "correlation"
+  ],
   "scripts": {
     "test": "bun test tests",
-    "typecheck": "bun run --cwd correlation typecheck",
+    "typecheck": "bun run --cwd correlation typecheck && bun run typecheck:app",
+    "typecheck:app": "tsc -p tsconfig.app.json",
     "build": "bun run --cwd correlation build",
     "build:web": "bun run scripts/export-demo.ts dist/index.html",
     "check:web": "python3 scripts/check-website.py",
     "demo": "bun run scripts/demo.ts",
     "export:demo": "bun run scripts/export-demo.ts",
     "dev": "bun run scripts/server.ts",
-    "simulate": "cre workflow simulate correlation --target local-simulation --non-interactive --trigger-index 0"
+    "simulate": "cre workflow simulate correlation --target local-simulation --non-interactive --trigger-index 0",
+    "check:pilot": "bun run scripts/check-pilot.ts",
+    "collector": "bun run scripts/collector.ts",
+    "format:check": "prettier --check app web/app scripts/server.ts scripts/collector.ts scripts/check-pilot.ts tests/pilot.test.ts tsconfig.app.json .prettierrc.json"
   },
   "devDependencies": {
-    "@chainlink/cre-sdk-javy-plugin": "1.7.0"
+    "@chainlink/cre-sdk-javy-plugin": "1.7.0",
+    "@types/bun": "1.3.11",
+    "prettier": "3.6.2",
+    "typescript": "5.9.3"
+  },
+  "dependencies": {
+    "zod": "3.25.76"
   }
 }

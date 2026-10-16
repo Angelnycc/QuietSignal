@@ -10,3 +10,10 @@ dist/
 .DS_Store
 .agents/
 skills-lock.json
+.quietsignal/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.pem
+*.key
+*-access.json

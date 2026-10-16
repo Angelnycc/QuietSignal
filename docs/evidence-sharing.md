@@ -15,7 +15,7 @@ The contributor's policy must authorize each released field and its recipients. 
 | Threshold corroboration and evidence provenance | Contributor identities and each contributor's detailed report |
 | Reason for the warning and known evidence limitations | An unsupported declaration that activity is malicious |
 
-The local prototype includes approved domains, software/version, a fixed sanitized activity sequence, a coarse search window, threshold-only corroboration, expiry, and an explicit synthetic-source limitation. File hashes, detailed sanitized process evidence, provenance verification, and private delivery require additional implementation.
+The local prototype includes approved domains, software/version, a fixed sanitized activity sequence, a coarse search window, threshold-only corroboration, expiry, and an explicit synthetic-source limitation. File hashes, detailed sanitized process evidence, verification that events actually occurred, and remote encrypted delivery require additional implementation.
 
 Example intended member message:
 
@@ -35,4 +35,6 @@ The synthetic fixture service exposes fictional records to the developer. `build
 
 `shareEvidenceWithConsortium` governs release of member briefs. It does not disable aggregate correlation; membership revocation (`active: false`) excludes contributions from both. A real deployment must define and obtain the permissions for both processing and each form of disclosure.
 
-The CRE workflow still returns a minimal aggregate status only. No production member access control, encrypted delivery, or source authenticity guarantee is implemented. The demo exposes the brief locally to illustrate the intended recipient experience. Moving that flow into confidential processing and protected delivery is a separate milestone.
+The authenticated `/api/pilot` workspace now enforces local operator/participant sessions, per-organization consent, current membership/collector activation, release allowlists, and per-request brief authorization. Signed synthetic collectors, persistent incidents and a scoped local audit trail are implemented. The operator preview follows release rules. Downloaded briefs cannot be recalled.
+
+The CRE workflow still reads fictional fixtures and returns aggregate status only; it does not consume pilot records or deliver member briefs. Production identity, encrypted remote delivery, deployed confidential processing and proof that source events actually occurred remain separate milestones. Registered collector signatures verify key possession only. See [the local pilot guide](local-pilot.md) and [security model](security-model.md).
