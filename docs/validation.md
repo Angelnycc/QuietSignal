@@ -41,3 +41,15 @@ API-key creation and deployment requests are deferred at the user's direction. T
 Source is published at Angelnycc/QuietSignal. GitHub Pages reports the website built successfully at https://angelnycc.github.io/QuietSignal/ (deployment run 38959195231). Direct public-host HTTP verification from this workspace was blocked by its outbound proxy; the exported document itself passed browser checks. See docs/publishing.md. The site's status section distinguishes the local prototype from future CRE, source-authenticity, encrypted-delivery, ACE, CCIP, and DECO/ZK integrations.
 
 Architecture review: shared policy defaults moved to correlation/defaults.ts, pure fixtures/export logic to demo/, and incident recognition/delivery to app/incidents.ts. The exporter now fills a JSON slot while preserving executable JavaScript. Core validation still checks the full snapshot before disclosure filtering so invalid suppressed inputs cannot hide conflicts. Historical successful CI/deployment run IDs above describe initial publication; inspect the main-branch badge for the latest review revision.
+
+## Portfolio refresh, 2026-10-17
+
+The refreshed light presentation, five original scenarios, consent/recipient
+simulation controls, and source/architecture links are integrated in the source
+website. The export remains a single HTML file and computes its inline-script CSP
+hash after rendering. Local export-slot tests, static build, and application type
+checks pass. Local Chromium launch is blocked by the desktop sandbox; the existing
+GitHub Actions browser suite, extended with both disclosure switches, is the
+required browser verification before Pages publication. The existing Netlify site
+was independently fetched and confirmed to contain the refreshed hero and controls.
+Netlify's Git connection must be verified separately from its existing manual deploy.

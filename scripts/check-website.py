@@ -41,6 +41,15 @@ with sync_playwright() as playwright:
         assert page.get_by_role('heading', name='No corroborated warning', exact=True).is_visible()
         assert page.locator('#export-brief').is_disabled()
         assert page.locator('#metric-briefs').inner_text() == '00'
+    # Disclosure controls withhold both the visible brief and downloadable data.
+    page.get_by_role('button', name='Reset demo').click()
+    for control in ['consent', 'recipient']:
+        page.locator('#' + control).uncheck()
+        assert page.locator('#export-brief').is_disabled()
+        assert page.locator('#metric-briefs').inner_text() == '00'
+        assert 'Disclosure withheld' in page.locator('#explanation').inner_text()
+        page.locator('#' + control).check()
+        page.get_by_role('heading', name='Evidence shared with the demo participant').wait_for()
     page.get_by_role('button', name='Reset demo').click()
     page.get_by_role('heading', name='Evidence shared with the demo participant').wait_for()
     with page.expect_download() as download:

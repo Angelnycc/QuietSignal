@@ -1,0 +1,14 @@
+[build]
+  command = "bun install --frozen-lockfile && bun run build:web"
+  publish = "dist"
+
+[build.environment]
+  BUN_VERSION = "1.3.11"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
