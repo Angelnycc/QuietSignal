@@ -47,29 +47,3 @@ jobs:
           bun run build:web
           bun run check:web
           bun run check:pilot
-      - name: Prepare the validated portfolio website
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: |
-          mkdir -p "$RUNNER_TEMP/quietsignal-pages"
-          cp dist/index.html "$RUNNER_TEMP/quietsignal-pages/index.html"
-          touch "$RUNNER_TEMP/quietsignal-pages/.nojekyll"
-      - name: Upload GitHub Pages artifact
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ${{ runner.temp }}/quietsignal-pages
-
-  publish:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: validate
-    runs-on: ubuntu-24.04
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy the validated website
-        id: deployment
-        uses: actions/deploy-pages@v4

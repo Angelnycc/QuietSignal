@@ -20,10 +20,12 @@ file, so no API or external script is required. Fixture dates reflect build-time
 samples, not current incident validity. Browser consent/recipient switches are
 illustrative disclosure controls, not authentication.
 
-GitHub Actions publishes Pages only after the main-branch validation job passes.
-Pages must use **GitHub Actions** as its build source. The historical `gh-pages`
-branch is retained for earlier exports; it is no longer the source of new Pages
-deployments. Use the generated `dist` output for standalone downloads.
+GitHub Pages currently deploys the `gh-pages` branch. After main-branch validation
+passes, publish the generated `dist/index.html` and `.nojekyll` there. The source
+login does not have the OAuth `workflow` scope, so this refresh does not modify
+Actions permissions or add automated Pages publishing. Netlify can rebuild from
+`main` automatically once its repository connection is enabled. Until a Pages
+automation is separately authorized, updates to its branch remain a release step.
 
 To keep the existing Netlify project synchronized, link **that existing project**
 to `Angelnycc/QuietSignal`, select `main`, and use the committed `netlify.toml`:
