@@ -3,25 +3,22 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="theme-color" content="#0a0e11" />
+    <meta name="theme-color" content="#f4f5ef" />
     <meta
       name="description"
       content="QuietSignal connects the evidence across organizations. Explore a selective threat-evidence sharing prototype built with the Chainlink CRE SDK."
     />
-    <title>QuietSignal — Collective defense. Selective disclosure.</title>
-    <link rel="canonical" href="https://angelnycc.github.io/QuietSignal/" />
+    <title>QuietSignal — A clearer signal. A smaller footprint.</title>
+    <link rel="canonical" href="https://quietsignal.netlify.app/" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="QuietSignal — Collective defense. Selective disclosure." />
+    <meta property="og:title" content="QuietSignal — A clearer signal. A smaller footprint." />
     <meta
       property="og:description"
       content="Explore selective threat-evidence sharing: an interactive cybersecurity portfolio project with signed collectors, policy-controlled briefs, and a Chainlink CRE workflow prototype."
     />
-    <meta property="og:url" content="https://angelnycc.github.io/QuietSignal/" />
-    <meta
-      property="og:image"
-      content="https://raw.githubusercontent.com/Angelnycc/QuietSignal/main/docs/assets/website-desktop.png"
-    />
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta property="og:url" content="https://quietsignal.netlify.app/" />
+
+    <meta name="twitter:card" content="summary" />
     <style>
       @font-face {
         font-family: LocalDisplay;
@@ -1579,7 +1576,371 @@
         margin-top: 12px;
       }
     </style>
-  </head>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f4f5ef;
+        --surface: #fff;
+        --panel: #e9ede4;
+        --line: #cdd5ca;
+        --soft: #e6ece1;
+        --text: #152b24;
+        --muted: #52645b;
+        --lime: #296247;
+        --teal: #22664e;
+        --amber: #815519;
+      }
+      .nav-bar {
+        background: rgba(244, 245, 239, 0.97);
+      }
+      .brand-tail {
+        color: #52645b;
+      }
+      .brand-mark {
+        color: #296247;
+      }
+      .hero {
+        padding-top: 44px;
+        background: radial-gradient(ellipse at 80% 50%, #dce8d5 0, transparent 60%);
+      }
+      .hero::before {
+        background-size: 32px 32px;
+        opacity: 0.4;
+      }
+      .hero h1 {
+        font-size: clamp(56px, 6.4vw, 92px);
+        font-weight: 500;
+      }
+      .hero h1 span {
+        font-family: Georgia, serif;
+        font-style: italic;
+        letter-spacing: -0.065em;
+      }
+      .hero-copy {
+        font-size: 17px;
+        line-height: 1.7;
+        max-width: 460px;
+      }
+      .hero-note,
+      .step-foot,
+      .metric-caption,
+      .demo-caption,
+      .architecture-note,
+      .footer-meta,
+      .node-label,
+      .disclosure-note {
+        color: #52645b;
+      }
+      .button {
+        border-radius: 5px;
+        font-size: 13px;
+        min-height: 48px;
+      }
+      .button.primary {
+        background: #245c42;
+        color: #fff;
+        border-color: #245c42;
+        box-shadow: 0 4px 0 #163e2d;
+      }
+      .button.primary:hover {
+        background: #174b32;
+      }
+      .tag {
+        border-radius: 30px;
+        background: #e9eee4;
+      }
+      .section {
+        padding: 90px 0;
+      }
+      h2 {
+        font-size: clamp(36px, 4vw, 58px);
+      }
+      .process-step {
+        padding-top: 26px;
+      }
+      .process-step h3 {
+        font-weight: 600;
+      }
+      .network {
+        background: #10271f;
+        border-radius: 14px;
+        box-shadow: 0 24px 55px #1d44231f;
+        --lime: #d2f879;
+        --muted: #aebfb7;
+      }
+      .network figcaption {
+        color: #c0cfc6;
+      }
+      .network .network-caption-right {
+        color: #aabcb2;
+      }
+      .network-label {
+        fill: #c5d2cb;
+      }
+      .network-small {
+        fill: #b4c7bd;
+      }
+      .network-center {
+        fill: #d2f879;
+      }
+      .network-line {
+        stroke: #6e897b;
+      }
+      .hero-baseline {
+        margin-top: 12px;
+      }
+      .baseline-item strong {
+        font-family: Georgia, serif;
+      }
+      .dashboard-section {
+        background: #e7ece2;
+      }
+      .console {
+        --bg: #101b19;
+        --surface: #152320;
+        --panel: #1b2d28;
+        --line: #354a40;
+        --soft: #253c32;
+        --text: #eff4ed;
+        --muted: #b5c4ba;
+        --lime: #d2f879;
+        --teal: #b3dfcd;
+        --amber: #e9bd7b;
+        color: var(--text);
+        border-radius: 12px;
+        box-shadow: 0 20px 45px #183b2320;
+        overflow: hidden;
+      }
+      .console .metric-caption {
+        color: #afc0b5;
+      }
+      .console-side {
+        background: #10231c;
+      }
+      .console-top {
+        background: #10231c;
+      }
+      .console-main {
+        background: #14251e;
+      }
+      .console .side-bottom,
+      .console .console-bottom,
+      .console .metric-label,
+      .console .result-category,
+      .console .evidence-heading,
+      .console .brief-note,
+      .console .evidence-dl dt,
+      .console .console-path,
+      .console .side-brand {
+        color: #b2c4b8;
+      }
+      .scenario-tabs button {
+        background: #1b3026;
+        color: #c7d3ca;
+        border-radius: 5px;
+        min-height: 44px;
+      }
+      .scenario-tabs button[aria-pressed='true'] {
+        background: #d2f879;
+        color: #152b24;
+        border-color: #d2f879;
+      }
+      .console .small-button {
+        min-height: 44px;
+        color: #d4dfd6;
+      }
+      .evidence-wrapper {
+        background: #102019;
+      }
+      .console .evidence-dl dd {
+        color: #e5eee7;
+      }
+      .console .evidence-dl dd.indicator {
+        color: #d2f879;
+      }
+      .console .aggregate {
+        background: #102019;
+      }
+      .console code {
+        color: #d9e6db;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+      .policy-controls {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        padding: 18px 0 22px;
+        align-items: center;
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 22px;
+        font-size: 12px;
+      }
+      .policy-controls label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 32px;
+      }
+      .policy-controls input {
+        width: 18px;
+        height: 18px;
+        accent-color: #d2f879;
+      }
+      .policy-controls span {
+        font: 9px var(--mono);
+        color: #a9bdb0;
+        margin-left: auto;
+      }
+      .disclosure-box {
+        background: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .disclosure-tabs button {
+        min-height: 54px;
+        color: #52645b;
+      }
+      .disclosure-tabs button[aria-selected='true'] {
+        color: #245c42;
+      }
+      .disclosure-title,
+      .code-row .key {
+        color: #52645b;
+      }
+      .code-row .value {
+        color: #273e32;
+      }
+      .code-row .value.good {
+        color: #245c42;
+      }
+      .code-row .redacted {
+        color: #758476;
+      }
+      .sharing-facts li {
+        color: #344f3e;
+      }
+      .architecture-node {
+        border-radius: 7px;
+        background: #edf0e8;
+      }
+      .node-state {
+        color: #296247;
+      }
+      .node-state.pending,
+      .tag.pending {
+        color: #805515;
+      }
+      .status-row .tag {
+        background: #e5ecdf;
+        color: #275a3e;
+      }
+      .resource-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+      }
+      .resource-grid a {
+        padding: 28px 0;
+        border-top: 2px solid #296247;
+      }
+      .resource-grid a:hover h3 {
+        text-decoration: underline;
+      }
+      .resource-grid span {
+        font: 10px var(--mono);
+        color: #52645b;
+      }
+      .resource-grid h3 {
+        margin: 16px 0 12px;
+      }
+      .resource-grid p {
+        font-size: 14px;
+        color: #52645b;
+        max-width: 300px;
+      }
+      .closing {
+        background: #dce8cf;
+        color: #183a28;
+      }
+      .closing .eyebrow {
+        color: #365d40;
+      }
+      .closing .button {
+        background: #245c42;
+        color: #fff;
+        border-color: #245c42;
+      }
+      .footer {
+        background: #f4f5ef;
+      }
+      .toast {
+        background: #183a28;
+        color: #fff;
+      }
+      .faq-list p {
+        color: #52645b;
+      }
+      .text-link:hover {
+        text-decoration: underline;
+      }
+      a:focus-visible,
+      button:focus-visible,
+      summary:focus-visible,
+      input:focus-visible {
+        outline: 3px solid #3c8060;
+        outline-offset: 4px;
+      }
+      .console :focus-visible {
+        outline-color: #d2f879;
+      }
+      details summary {
+        min-height: 48px;
+      }
+      button,
+      a {
+        touch-action: manipulation;
+      }
+      @media (max-width: 760px) {
+        .section {
+          padding: 64px 0;
+        }
+        .network {
+          margin: 16px 0;
+        }
+        .main-nav {
+          background: #f4f5ef;
+        }
+        .hero h1 {
+          font-size: 60px;
+        }
+        .hero-copy {
+          font-size: 16px;
+        }
+        .resource-grid {
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+        .policy-controls {
+          gap: 10px;
+        }
+        .policy-controls span {
+          margin-left: 0;
+          width: 100%;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
+          scroll-behavior: auto !important;
+        }
+      }
+    </style>
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Qa/dpNkVNXeArdmAbLSEhPYIsGKySFYuPoZtXVJ8KZ0='; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'" /></head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
     <header class="nav-bar">
@@ -1601,7 +1962,8 @@
         </button>
         <nav class="main-nav" id="primary-nav" aria-label="Primary">
           <a href="#how-it-works">How it works</a><a href="#dashboard">Dashboard</a
-          ><a href="#architecture">Architecture</a><a href="#architecture" data-pilot-link>Local pilot status</a>
+          ><a href="#architecture">Architecture</a
+          ><a href="#architecture" data-pilot-link>Local pilot status</a>
         </nav>
         <a class="button nav-cta" href="#dashboard"
           >Explore the demo
@@ -1615,14 +1977,14 @@
         <div class="wrap">
           <div class="hero-top">
             <div class="eyebrow">Collective defense. Selective disclosure.</div>
-            <span class="tag"><span class="dot"></span> RESEARCH PROTOTYPE / 0.1</span>
+            <span class="tag"><span class="dot"></span> RESEARCH PROTOTYPE / INTERACTIVE DEMO</span>
           </div>
           <div class="hero-grid">
             <div>
-              <h1>Threats connect.<br />Now, so can<br /><span>your evidence.</span></h1>
+              <h1>A clearer signal.<br />A smaller<br /><span>footprint.</span></h1>
               <p class="hero-copy">
-                One organization sees an anomaly. Together, you see a pattern. Exchange the evidence
-                that helps others investigate, while keeping unnecessary details out of the picture.
+                Connect software-supplier observations across organizations. Share enough evidence
+                to investigate, while keeping full logs and identifying details at the source.
               </p>
               <div class="hero-actions">
                 <a class="button primary" href="#dashboard"
@@ -1840,7 +2202,7 @@
         <div class="wrap">
           <div class="eyebrow">02 / Explore the product</div>
           <div class="section-head">
-            <h2>Your shared view.<br />Your evidence boundaries.</h2>
+            <h2>Investigate the pattern.<br />Test the boundaries.</h2>
             <div>
               <p class="muted dashboard-description">
                 Switch scenarios to see when a warning is supported—and when the evidence should
@@ -1893,6 +2255,13 @@
                       <path d="M3 5a5 5 0 1 1-1 4M2 1v5h5" stroke="currentColor" /></svg
                     >Reset demo
                   </button>
+                </div>
+                <div class="policy-controls">
+                  <label
+                    ><input type="checkbox" id="consent" checked /> Contributor sharing
+                    consent</label
+                  ><label><input type="checkbox" id="recipient" checked /> Eligible recipient</label
+                  ><span>LOCAL POLICY SIMULATION</span>
                 </div>
                 <div class="scenario-label">
                   <span>Choose a scenario</span><span>05 AVAILABLE</span>
@@ -1982,9 +2351,10 @@
             </div>
           </div>
           <p class="demo-caption" id="demo-notice">
-            Offline synthetic demonstration. Evidence times are fixed samples; no live monitoring or requests are performed. All organizations and events are fictional. No live
-            monitoring, deployed enclave, or zero-knowledge proof. This dashboard demonstrates
-            policy behavior, not production authentication.
+            Offline synthetic demonstration. Evidence times are fixed samples; no live monitoring or
+            requests are performed. All organizations and events are fictional. No live monitoring,
+            deployed enclave, or zero-knowledge proof. This dashboard demonstrates policy behavior,
+            not production authentication.
           </p>
         </div>
       </section>
@@ -2130,19 +2500,19 @@
               <span class="node-label">INPUT / 01</span>
               <h3>Source observations</h3>
               <p>Relevant activity from an organization's evidence connector.</p>
-              <span class="node-state">SYNTHETIC SOURCE</span>
+              <span class="node-state">SYNTHETIC DEMONSTRATION</span>
             </article>
             <article class="architecture-node">
               <span class="node-label">WORKFLOW / 02</span>
               <h3>CRE coordination</h3>
               <p>A confidential-handler entry point for correlation and evaluation.</p>
-              <span class="node-state">WASM BUILD VALIDATED</span>
+              <span class="node-state">PROTOTYPE ADAPTER</span>
             </article>
             <article class="architecture-node">
               <span class="node-label">POLICY / 03</span>
               <h3>Selective release</h3>
               <p>Consent, recipient eligibility, and explicit evidence allowlists.</p>
-              <span class="node-state">LOCAL RULES TESTED</span>
+              <span class="node-state">PROTOTYPE RULES</span>
             </article>
             <article class="architecture-node">
               <span class="node-label">OUTPUT / 04</span>
@@ -2185,6 +2555,33 @@
               <p>Candidate integrations with distinct verification and policy roles.</p>
               <span class="tag pending">FUTURE WORK</span>
             </div>
+          </div>
+        </div>
+      </section>
+      <section class="section resources" id="resources">
+        <div class="wrap">
+          <div class="eyebrow">Open by design</div>
+          <div class="section-head">
+            <h2>Inspect the work.<br />Build on the idea.</h2>
+            <p>
+              Explore the implementation and its trust boundaries before using any part of the
+              prototype.
+            </p>
+          </div>
+          <div class="resource-grid">
+            <a href="https://github.com/Angelnycc/QuietSignal"
+              ><span>01 / SOURCE</span>
+              <h3>Explore the repository ↗</h3>
+              <p>Backend, correlation rules, collectors, tests, and documentation.</p></a
+            ><a href="https://github.com/Angelnycc/QuietSignal/blob/main/docs/architecture.md"
+              ><span>02 / ARCHITECTURE</span>
+              <h3>Follow the evidence ↗</h3>
+              <p>Components, access boundaries, and the path from observation to brief.</p></a
+            ><a href="https://github.com/Angelnycc/QuietSignal#readme"
+              ><span>03 / GET STARTED</span>
+              <h3>Run the original prototype ↗</h3>
+              <p>Setup instructions, project scope, and known limitations.</p></a
+            >
           </div>
         </div>
       </section>
@@ -2280,7 +2677,7 @@
       </div>
     </footer>
     <div class="toast" id="toast" role="status" hidden></div>
-    <script id="demo-scenarios" type="application/json">{"correlated":{"scenario":"correlated","mode":"local-simulation","policyVersion":"supplier-sequence-v1","evaluatedAtMs":1792182057192,"validUntilMs":1792182117192,"status":"corroborated-pattern","evidenceBriefs":[{"synthetic":true,"disclosurePolicyVersion":"synthetic-evidence-sharing-v1","correlationPolicyVersion":"supplier-sequence-v1","supplier":{"name":"Demo MaintenanceTool","version":"4.2.1"},"indicator":{"kind":"domain","value":"relay.supplier-incident.example"},"pattern":["software-update","new-outbound-destination","unusual-child-process"],"correlationWindow":{"startMs":1792179900000,"endMs":1792182600000,"precision":"coarse-search-window"},"corroboration":{"organizationsAtLeast":3,"sequenceOrganizationsAtLeast":2},"provenance":"synthetic-fixture-source; authenticity-not-verified","assessment":"investigation-lead; maliciousness-not-established","expiresAtMs":1792182117192}],"deliveryMode":"offline-synthetic-demo"},"duplicate-reports":{"scenario":"duplicate-reports","mode":"local-simulation","policyVersion":"supplier-sequence-v1","evaluatedAtMs":1792182057192,"validUntilMs":1792182117192,"status":"no-corroborated-pattern","evidenceBriefs":[],"deliveryMode":"offline-synthetic-demo"},"benign-overlap":{"scenario":"benign-overlap","mode":"local-simulation","policyVersion":"supplier-sequence-v1","evaluatedAtMs":1792182057192,"validUntilMs":1792182117192,"status":"no-corroborated-pattern","evidenceBriefs":[],"deliveryMode":"offline-synthetic-demo"},"expired":{"scenario":"expired","mode":"local-simulation","policyVersion":"supplier-sequence-v1","evaluatedAtMs":1792182057192,"validUntilMs":1792182117192,"status":"no-corroborated-pattern","evidenceBriefs":[],"deliveryMode":"offline-synthetic-demo"},"revoked-member":{"scenario":"revoked-member","mode":"local-simulation","policyVersion":"supplier-sequence-v1","evaluatedAtMs":1792182057192,"validUntilMs":1792182117192,"status":"no-corroborated-pattern","evidenceBriefs":[],"deliveryMode":"offline-synthetic-demo"}}</script>
+    <script id="demo-scenarios" type="application/json">{"correlated":{"scenario":"correlated","mode":"local-simulation","policyVersion":"supplier-sequence-v1","evaluatedAtMs":1792280347449,"validUntilMs":1792280407449,"status":"corroborated-pattern","evidenceBriefs":[{"synthetic":true,"disclosurePolicyVersion":"synthetic-evidence-sharing-v1","correlationPolicyVersion":"supplier-sequence-v1","supplier":{"name":"Demo MaintenanceTool","version":"4.2.1"},"indicator":{"kind":"domain","value":"relay.supplier-incident.example"},"pattern":["software-update","new-outbound-destination","unusual-child-process"],"correlationWindow":{"startMs":1792278000000,"endMs":1792280700000,"precision":"coarse-search-window"},"corroboration":{"organizationsAtLeast":3,"sequenceOrganizationsAtLeast":2},"provenance":"synthetic-fixture-source; authenticity-not-verified","assessment":"investigation-lead; maliciousness-not-established","expiresAtMs":1792280407449}],"deliveryMode":"offline-synthetic-demo"},"duplicate-reports":{"scenario":"duplicate-reports","mode":"local-simulation","policyVersion":"supplier-sequence-v1","evaluatedAtMs":1792280347449,"validUntilMs":1792280407449,"status":"no-corroborated-pattern","evidenceBriefs":[],"deliveryMode":"offline-synthetic-demo"},"benign-overlap":{"scenario":"benign-overlap","mode":"local-simulation","policyVersion":"supplier-sequence-v1","evaluatedAtMs":1792280347449,"validUntilMs":1792280407449,"status":"no-corroborated-pattern","evidenceBriefs":[],"deliveryMode":"offline-synthetic-demo"},"expired":{"scenario":"expired","mode":"local-simulation","policyVersion":"supplier-sequence-v1","evaluatedAtMs":1792280347449,"validUntilMs":1792280407449,"status":"no-corroborated-pattern","evidenceBriefs":[],"deliveryMode":"offline-synthetic-demo"},"revoked-member":{"scenario":"revoked-member","mode":"local-simulation","policyVersion":"supplier-sequence-v1","evaluatedAtMs":1792280347449,"validUntilMs":1792280407449,"status":"no-corroborated-pattern","evidenceBriefs":[],"deliveryMode":"offline-synthetic-demo"}}</script>
     <script>
       const offlineScenarios = JSON.parse(document.getElementById('demo-scenarios').textContent)
       async function loadDemoScenario(scenario) {
@@ -2305,6 +2702,7 @@
       }
       let requestVersion = 0
       let currentBriefs = []
+      let selectedScenario = 'correlated'
       let toastTimer
       const byId = (id) => document.getElementById(id)
       const dateLabel = (value) =>
@@ -2375,6 +2773,7 @@
         }
       }
       async function select(scenario) {
+        selectedScenario = scenario
         const version = ++requestVersion
         currentBriefs = []
         document
@@ -2398,24 +2797,37 @@
             ...summary
           } = await response.json()
           if (version !== requestVersion) return
-          currentBriefs = evidenceBriefs
+          const eligible = byId('consent').checked && byId('recipient').checked
+          const releasedBriefs = eligible ? evidenceBriefs : []
+          currentBriefs = releasedBriefs
           const corroborated = summary.status === 'corroborated-pattern'
           byId('status').textContent = corroborated
             ? 'Corroborated unusual activity'
             : 'No corroborated warning'
-          byId('status').style.color = corroborated ? 'var(--lime)' : 'var(--text)'
-          byId('explanation').textContent = descriptions[scenario]
-          byId('summary').textContent = JSON.stringify(summary, null, 2)
+          byId('explanation').textContent =
+            descriptions[scenario] +
+            (eligible
+              ? ''
+              : ' Disclosure withheld: contributor consent and recipient eligibility are both required.')
+          byId('summary').textContent = JSON.stringify(
+            {
+              ...summary,
+              disclosure: eligible ? 'eligible' : 'withheld-by-local-policy',
+              releasedBriefs: releasedBriefs.length,
+            },
+            null,
+            2
+          )
           byId('metric-members').textContent = evidenceBriefs.length
             ? '≥ ' + evidenceBriefs[0].corroboration.organizationsAtLeast
             : '—'
-          byId('metric-briefs').textContent = String(evidenceBriefs.length).padStart(2, '0')
+          byId('metric-briefs').textContent = String(releasedBriefs.length).padStart(2, '0')
           byId('result-number').textContent = corroborated ? 'QS / 001' : 'QS / —'
           byId('assessment-badge').textContent = corroborated
             ? 'INVESTIGATION RECOMMENDED'
             : 'RULE NOT SATISFIED'
-          byId('export-brief').disabled = !evidenceBriefs.length
-          showEvidence(evidenceBriefs)
+          byId('export-brief').disabled = !releasedBriefs.length
+          showEvidence(releasedBriefs)
         } catch {
           if (version !== requestVersion) return
           byId('status').textContent = 'Unable to evaluate scenario'
@@ -2429,14 +2841,22 @@
       document
         .querySelectorAll('[data-scenario]')
         .forEach((b) => b.addEventListener('click', () => select(b.dataset.scenario)))
-      byId('reset-demo').addEventListener('click', () => select('correlated'))
+      byId('reset-demo').addEventListener('click', () => {
+        byId('consent').checked = true
+        byId('recipient').checked = true
+        select('correlated')
+      })
+      ;['consent', 'recipient'].forEach((id) =>
+        byId(id).addEventListener('change', () => select(selectedScenario))
+      )
       byId('export-brief').addEventListener('click', () => {
         if (!currentBriefs.length) return
         const blob = new Blob(
           [
             JSON.stringify(
               {
-                notice: 'Fictional demonstration evidence. Not a real incident report.',
+                notice:
+                  'Fictional historical fixture replay. Not current evidence or a real incident report.',
                 evidenceBriefs: currentBriefs,
               },
               null,
